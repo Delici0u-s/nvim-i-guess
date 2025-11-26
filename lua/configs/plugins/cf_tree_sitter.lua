@@ -16,6 +16,17 @@ require'nvim-treesitter'.install {
 	'lua',
 }
 
-vim.treesitter.start()
+-- only start when filetype is recognized
+local ft = vim.bo.filetype
+local lang = vim.treesitter.language.get_lang(ft)
+if lang then
+  local ok, parser = pcall(vim.treesitter.get_parser, 0, lang)
+  if ok and parser then
+    vim.treesitter.start()
+  end
+end
+
+
 vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
 vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+
