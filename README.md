@@ -3,3 +3,4 @@
 nvim requirenments
 tree-sitter-cli
 pyright
+clangd
