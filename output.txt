@@ -28,21 +28,32 @@ al.load_folders_in_dir()
 configs\general\keybinds.lua:
 
 -- map helper
-local function map(mode, lhs, rhs, opts)
-	local options = { noremap = true }
-	if opts then
-		options = vim.tbl_extend("force", options, opts)
-	end
-	vim.api.nvim_set_keymap(mode, lhs, rhs, options)
-end
+local kb = require("utils.keybinds")
 
-map(
+kb.map(
 	"n",
 	"<C-l>",
 	[[ (&hls && v:hlsearch ? ':nohls' : ':set hls')."\n" <BAR> redraw<CR>]],
 	{ silent = true, expr = true }
 )
 
+
+
+
+
+
+
+
+configs\plugins\cf_cmp.lua:
+
+-- lua/configs/plugins/cmp_config.lua
+local M = {}
+
+function M.setup()
+	-- todo here
+end
+
+return function() M.setup() end
 
 
 
@@ -96,6 +107,8 @@ require("lazy").setup({
 
 configs\plugins\cf_lspconfig.lua:
 
+-- wrap everything so it can be loaded in plugins.general in the lspconfig func
+return function()
 -- LSP configuration using utility functions and flexible server customization
 
 local utils = require("utils.path")
@@ -112,7 +125,13 @@ local function on_attach(client, bufnr)
 end
 
 -- Default capabilities
-local capabilities = vim.lsp.protocol.make_client_capabilities()
+-- before: nvim-cmp
+-- local capabilities = vim.lsp.protocol.make_client_capabilities()
+
+-- after:
+local ok, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
+local capabilities = ok and cmp_nvim_lsp.default_capabilities() or vim.lsp.protocol.make_client_capabilities()
+
 
 -- Helper to register + enable server
 local function register_server(name, config)
@@ -156,6 +175,20 @@ for name, s in pairs(servers) do
   }, default_config, s)  -- merge per-server config last to allow overrides
   register_server(name, cfg)
 end
+
+end
+
+
+
+
+
+
+configs\plugins\cf_luasnip.lua:
+
+local ls = require("luasnip")
+local kb = require("utils.keybinds")
+
+kb.map({"i"}, "<C-K>", function() ls.expand() end, {silent = true})
 
 
 
@@ -228,9 +261,32 @@ return {
 },
 {
 	"neovim/nvim-lspconfig",
-	-- config = function()
-	-- require("configs.plugins.cf_lazy")
-	-- end,
+	config = function()
+	  require("configs.plugins.cf_lspconfig")()
+	end
+},
+{
+	"L3MON4D3/LuaSnip",
+	-- follow latest release.
+	version = "v2.4.1", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
+	-- install jsregexp (optional!).
+	build = "make install_jsregexp"
+},
+{
+  "hrsh7th/nvim-cmp",
+  event = "InsertEnter",
+  dependencies = {
+    "hrsh7th/cmp-nvim-lsp", 
+    "hrsh7th/cmp-buffer",    
+    "hrsh7th/cmp-path",       
+    "hrsh7th/cmp-cmdline",     
+    -- "saadparwaiz1/cmp_luasnip",
+    -- "rafamadriz/friendly-snippets",
+  },
+  config = function()
+    -- full config shown below (copy it into here or require a separate file)
+    require("configs.plugins.cf_cmp")()
+  end,
 },
 }
 
@@ -326,6 +382,26 @@ end
 
 return M
 
+
+
+
+
+
+
+utils\keybinds.lua:
+
+local M = {}
+
+function M.map(mode, lhs, rhs, opts)
+	local options = { noremap = true }
+	if opts then
+		options = vim.tbl_extend("force", options, opts)
+	end
+	vim.api.nvim_set_keymap(mode, lhs, rhs, options)
+end
+
+
+return M
 
 
 

@@ -16,7 +16,13 @@ local function on_attach(client, bufnr)
 end
 
 -- Default capabilities
-local capabilities = vim.lsp.protocol.make_client_capabilities()
+-- before: nvim-cmp
+-- local capabilities = vim.lsp.protocol.make_client_capabilities()
+
+-- after:
+local ok, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
+local capabilities = ok and cmp_nvim_lsp.default_capabilities() or vim.lsp.protocol.make_client_capabilities()
+
 
 -- Helper to register + enable server
 local function register_server(name, config)
