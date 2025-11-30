@@ -6,6 +6,7 @@ log.write('New Session!!!')
 -- loads custom configs, loads like everything lmao
 require("configs")
 
+
 -- print successfull loading of "packages" or whatever the fuck dis called
 log.write(vim.inspect(package.loaded["configs.plugins.cf_lspconfig"]))
 log.write(vim.inspect(package.loaded["configs.general.keybinds"]))
