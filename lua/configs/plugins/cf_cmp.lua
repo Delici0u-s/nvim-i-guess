@@ -1,35 +1,42 @@
 -- configs/plugins/cf_cmp.lua
 local M = {}
 
+local log = require("utils.log")
+
 function M.setup()
-  vim.notify("cf_cmp.setup() running", vim.log.levels.INFO)
+  -- vim.notify("cf_cmp.setup() running", vim.log.levels.INFO)
 
   local ok, cmp = pcall(require, "cmp")
   if not ok or not cmp then
-    vim.notify("nvim-cmp not available: " .. tostring(cmp), vim.log.levels.ERROR)
+    log.write("nvim-cmp not available: " .. tostring(cmp))
     return
   end
 
   local luasnip_ok, luasnip = pcall(require, "luasnip")
   if not luasnip_ok then
     luasnip = nil
-    vim.notify("luasnip not available (continuing without snippet support)", vim.log.levels.WARN)
+    log.write("luasnip not available (continuing without snippet support)")
   end
 
   cmp.setup({
     snippet = {
       expand = function(args)
-        if luasnip then
+	if luasnip then
           luasnip.lsp_expand(args.body)
         end
       end,
     },
 
+    window = {
+      completion = cmp.config.window.bordered(),
+      documentation = cmp.config.window.bordered(),
+    },
+
     mapping = {
-      ["<C-Space>"] = cmp.mapping.complete(),
+      -- ["<C-Space>"] = cmp.mapping.complete(),
       ["<CR>"] = cmp.mapping.confirm({ select = true }),
 
-      ["<Tab>"] = cmp.mapping(function(fallback)
+      ["<C-J>"] = cmp.mapping(function(fallback)
         if cmp.visible() then
           cmp.select_next_item()
         elseif luasnip and luasnip.expand_or_jumpable() then
@@ -39,7 +46,7 @@ function M.setup()
         end
       end, { "i", "s" }),
 
-      ["<S-Tab>"] = cmp.mapping(function(fallback)
+      ["<C-K>"] = cmp.mapping(function(fallback)
         if cmp.visible() then
           cmp.select_prev_item()
         elseif luasnip and luasnip.jumpable(-1) then
@@ -50,12 +57,18 @@ function M.setup()
       end, { "i", "s" }),
     },
 
-    sources = cmp.config.sources({
-      { name = "nvim_lsp" },
-      { name = "luasnip" },
-      { name = "buffer" },
-      { name = "path" },
+        sources = cmp.config.sources({
+      { name = 'nvim_lsp' },
+      { name = 'luasnip' },
+    }, {
+      { name = 'buffer' },
     }),
+    -- sources = cmp.config.sources({
+    --   { name = "nvim_lsp" },
+    --   { name = "luasnip" },
+    --   { name = "buffer" },
+    --   { name = "path" },
+    -- }),
   })
 
   vim.notify("cf_cmp.setup() finished", vim.log.levels.INFO)

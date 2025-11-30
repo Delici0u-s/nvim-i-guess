@@ -8,6 +8,7 @@ return {
 },
 {
 	"neovim/nvim-lspconfig",
+	lazy = false;
 	config = function()
 	  require("configs.plugins.cf_lspconfig")()
 	end
@@ -27,10 +28,12 @@ return {
     "hrsh7th/cmp-buffer",    
     "hrsh7th/cmp-path",       
     "hrsh7th/cmp-cmdline",     
-    -- "saadparwaiz1/cmp_luasnip",
+    "saadparwaiz1/cmp_luasnip",
     -- "rafamadriz/friendly-snippets",
   },
   config = function()
+    -- local cmp_caps = require("cmp_nvim_lsp").default_capabilities()
+    -- vim.lsp.config("*", { capabilities = cmp_caps })
     -- full config shown below (copy it into here or require a separate file)
     require("configs.plugins.cf_cmp")()
   end,

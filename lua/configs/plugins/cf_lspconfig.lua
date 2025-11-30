@@ -1,70 +1,27 @@
--- wrap everything so it can be loaded in plugins.general in the lspconfig func
+-- configs/plugins/cf_lspconfig.lua
+local log = require("utils.log")
+
+
 return function()
--- LSP configuration using utility functions and flexible server customization
+  local lspconfig_path = vim.fn.stdpath("config") .. "/lua/configs/plugins/lsps"
 
-local utils = require("utils.path")
+  for _, file in ipairs(vim.fn.readdir(lspconfig_path)) do
+    if file:match("%.lua$") and file ~= "init.lua" then
+      local server = file:gsub("%.lua$", "")
 
--- Basic on_attach: keymaps
-local function on_attach(client, bufnr)
-  local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
-  local opts = { noremap = true, silent = true }
+      local ok, cfg = pcall(require, "configs.plugins.lsps." .. server)
+      if ok then
+        -- Register LSP configuration
+        vim.lsp.config(server, cfg)
 
-  buf_set_keymap("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", opts)
-  buf_set_keymap("n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", opts)
-  buf_set_keymap("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", opts)
-  -- add more mappings if needed
+        -- Enable server with its config
+        vim.lsp.enable(server)
+
+	log.write("Enabled LSP: " .. server)
+      else
+        vim.notify("Failed to load LSP config for " .. server .. ": " .. cfg, vim.log.levels.ERROR)
+      end
+    end
+  end
 end
 
--- Default capabilities
--- before: nvim-cmp
--- local capabilities = vim.lsp.protocol.make_client_capabilities()
-
--- after:
-local ok, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
-local capabilities = ok and cmp_nvim_lsp.default_capabilities() or vim.lsp.protocol.make_client_capabilities()
-
-
--- Helper to register + enable server
-local function register_server(name, config)
-  vim.lsp.config(name, config)
-  vim.lsp.enable(name)
-end
-
--- Shared defaults (can be overridden per server)
-local default_config = {
-  on_attach = on_attach,
-  capabilities = capabilities,
-}
-
--- Server table: each server can override any defaults or add new fields
-local servers = {
-  pyright = {
-    cmd = { "pyright-langserver", "--stdio" },
-    filetypes = { "python" },
-    root_patterns = { "pyproject.toml", "setup.cfg", "requirements.txt", ".git" },
-    -- custom per-server fields can be added here:
-    settings = { python = { analysis = { typeCheckingMode = "off" } } },
-  },
-
-  clangd = {
-    cmd = { "clangd" },
-    filetypes = { "c", "cpp", "objc", "objcpp" },
-    root_patterns = { "compile_commands.json", "compile_flags.txt", "meson.build", "CMakeLists.txt", ".git" },
-    -- example of adding clangd-specific flags
-    init_options = { clangdFileStatus = true },
-  },
-
-  -- add more servers here
-}
-
--- Register servers, merging defaults with per-server config
-for name, s in pairs(servers) do
-  local cfg = vim.tbl_deep_extend("force", {
-    cmd = s.cmd,
-    filetypes = s.filetypes,
-    root_dir = utils.root_dir_factory(s.root_patterns or { ".git" }),
-  }, default_config, s)  -- merge per-server config last to allow overrides
-  register_server(name, cfg)
-end
-
-end
