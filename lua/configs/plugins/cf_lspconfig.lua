@@ -5,6 +5,7 @@ local enabled_plugins = {
   "lua_ls",
   "pyright",
   "clangd",
+  "jdtls",
   -- "gibberish",
 }
 
