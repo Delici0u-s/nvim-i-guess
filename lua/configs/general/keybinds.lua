@@ -1,8 +1,7 @@
 -- map helper
 local kb = require("utils.keybinds")
 
--- more keybinds in cf_cmp.lua
-
+-- remove highlighting
 kb.map(
 	"n",
 	"<C-l>",
@@ -10,7 +9,15 @@ kb.map(
 	{ silent = true, expr = true }
 )
 
+-- save on ctrl s
 kb.map("n", "<C-S>", ":w<cr>", { silent = true })
 kb.map("i", "<C-S>", ":w<cr>", { silent = true })
+
 -- exit terminal insert mode
 kb.map("t", "<C-X>", "<C-\\><C-n>", { silent = true })
+
+-- open terminal in vertical split
+kb.map("n", "<leader>vt", function()
+	vim.cmd("vsplit")
+	vim.cmd("terminal")
+end, { desc = "Vertical terminal" })
