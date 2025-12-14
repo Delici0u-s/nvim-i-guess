@@ -1,2 +1,0 @@
--- nothing here, refer to enabled/disabled for configs
--- dont remove this init.lua tho lol cuz this folder gets autoloaded

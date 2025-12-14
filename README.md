@@ -1,7 +1,19 @@
-bleh
-# Requirenments  
-nvim requirenments
-tree-sitter-cli
-pyright
-clangd
-lua-language-server
+# Requirements
+
+## Core
+- Neovim ≥ 0.9 (0.10+ recommended)
+- git
+- Node.js (npm)
+- tree-sitter-cli
+
+## Recommended
+- C compiler (gcc or clang)
+- Python ≥ 3.8
+- Java (JDK 17+)
+
+## Optional (Language Support)
+- Rust toolchain (rust-analyzer)
+- Zig
+- Docker
+- Terraform
+

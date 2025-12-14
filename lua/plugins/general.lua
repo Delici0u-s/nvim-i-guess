@@ -6,13 +6,13 @@ return {
 	build = ':TSUpdate',
 
 },
-{
-	"neovim/nvim-lspconfig",
-	lazy = false;
-	config = function()
-	  require("configs.plugins.cf_lspconfig")()
-	end
-},
+-- {
+-- 	"neovim/nvim-lspconfig",
+-- 	lazy = false;
+-- 	config = function()
+-- 	  require("configs.plugins.cf_lspconfig")()
+-- 	end
+-- },
 {
 	"L3MON4D3/LuaSnip",
 	-- follow latest release.
@@ -38,5 +38,43 @@ return {
     require("configs.plugins.cf_cmp")()
   end,
 },
+{
+    'nvim-lualine/lualine.nvim',
+    dependencies = { 'nvim-tree/nvim-web-devicons' }
+},
+{
+  "luukvbaal/statuscol.nvim",
+  config = function()
+    require("configs.plugins.cf_statuscol")()
+  end,
+},
+{
+	"folke/lazydev.nvim",
+	ft = "lua", -- only load on lua files
+	opts = {
+	library = {
+		-- See the configuration section for more details
+		-- Load luvit types when the `vim.uv` word is found
+		{
+			path = "${3rd}/luv/library", words = { "vim%.uv" } 
+		},
+	},
+	},
+},
+{
+  "williamboman/mason.nvim",
+  lazy = false,
+  config = function()
+    require("mason").setup()
+  end,
+},
+{
+    "mason-org/mason-lspconfig.nvim",
+    opts = {},
+    dependencies = {
+        { "mason-org/mason.nvim", opts = {} },
+        "neovim/nvim-lspconfig",
+    },
+}
 }
 

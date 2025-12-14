@@ -11,3 +11,6 @@ kb.map(
 )
 
 kb.map("n", "<C-S>", ":w<cr>" , { silent = true })
+-- exit terminal insert mode
+kb.map("t", "<C-X>", "<C-\\><C-n>", { silent = true })
+
