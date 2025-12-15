@@ -1,29 +1,33 @@
-require("mason-lspconfig").setup {
-  automatic_enable = true,
-  ensure_installed = {
-    -- Core
-    "lua_ls",
-    "pyright",
-    "clangd",
-    "jdtls",
+return function()
+	local lspconfig = require("lspconfig")
+	local lsp = require("configs.plugins.cf_lsp")
 
-    -- General
-    "bashls",
-    "jsonls",
-    "yamlls",
-    "marksman",
-    "cmake",
-    "mesonlsp",
+	require("mason-lspconfig").setup({
+		automatic_enable = true,
+		ensure_installed = {
+			-- Core
+			"lua_ls",
+			"pyright",
+			"clangd",
+			"jdtls",
 
-    -- Web
-    "ts_ls",
-    "html",
-    "cssls",
-    "eslint",
+			-- General
+			"bashls",
+			"jsonls",
+			"yamlls",
+			"marksman",
+			"cmake",
+			"mesonlsp",
 
-    -- DevOps
-    "dockerls",
-    "terraformls",
-  },
-}
+			-- Web
+			"ts_ls",
+			"html",
+			"cssls",
+			"eslint",
 
+			-- DevOps
+			"dockerls",
+			"terraformls",
+		},
+	})
+end

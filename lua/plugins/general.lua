@@ -75,6 +75,9 @@ return {
 			{ "mason-org/mason.nvim", opts = {} },
 			"neovim/nvim-lspconfig",
 		},
+		config = function()
+			require("configs.plugins.cf_mason")()
+		end,
 	},
 	{
 		"nvim-telescope/telescope.nvim",
