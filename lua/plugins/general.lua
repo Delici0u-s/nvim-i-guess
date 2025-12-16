@@ -116,4 +116,12 @@ return {
 			require("configs.plugins.cf_indent_blankline")()
 		end,
 	},
+	{
+		"ray-x/lsp_signature.nvim",
+		event = "InsertEnter",
+		opts = {},
+		config = function()
+			require("configs.plugins.cf_lsp_signature")()
+		end,
+	},
 }

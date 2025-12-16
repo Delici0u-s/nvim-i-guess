@@ -1,7 +1,7 @@
 -- print logfile location
 local log = require("utils.log")
 print("Logfile path: " .. log._log_path)
-log.write("New Session!!!")
+log.write("New Session =_=!!!")
 
 -- loads custom configs, loads like everything lmao
 require("configs")
