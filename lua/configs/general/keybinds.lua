@@ -42,3 +42,16 @@ kb.map("n", "ht", function()
 end, { desc = "Horizontal terminal" })
 
 -- todo implement hotkey hook
+-- temp:
+-- execute macro for key after this combo
+kb.map("n", "<C-a>", function()
+	-- Prompt for a single key without needing Enter
+	vim.api.nvim_echo({ { "Press macro register:", "Normal" } }, false, {})
+	local reg = vim.fn.getchar() -- gets the keycode
+	reg = vim.fn.nr2char(reg) -- convert keycode to character
+
+	-- Run the macro if a key was pressed
+	if reg ~= "" then
+		vim.api.nvim_feedkeys("@" .. reg, "n", true)
+	end
+end, { silent = true })
