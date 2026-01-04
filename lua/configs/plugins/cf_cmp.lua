@@ -73,7 +73,7 @@ function M.setup()
 		-- }),
 	})
 
-	vim.notify("cf_cmp.setup() finished", vim.log.levels.INFO)
+	-- vim.notify("cf_cmp.setup() finished", vim.log.levels.INFO)
 end
 
 -- keep same shape as your plugin config expects: require("configs.plugins.cf_cmp")()
