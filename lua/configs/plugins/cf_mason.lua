@@ -28,7 +28,7 @@ return function()
     vim.api.nvim_create_autocmd({ "BufWritePost" }, {
         callback = function(args)
             for _, client in ipairs(vim.lsp.get_clients({ bufnr = args.buf })) do
-                client.notify("workspace/didChangeWatchedFiles", {
+                client:notify("workspace/didChangeWatchedFiles", {
                     changes = {
                         {
                             uri = vim.uri_from_bufnr(args.buf),
