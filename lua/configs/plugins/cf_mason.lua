@@ -1,37 +1,30 @@
 return function()
-    local lspconfig = require("lspconfig")
-    local lsp = require("configs.plugins.cf_lsp")
+    local util = require("lspconfig.util") -- util functions are still useful
+    local mason_lsp = require("mason-lspconfig")
 
-    require("mason-lspconfig").setup({
-        automatic_enable = true,
-        automaitc_setup = true,
+    -- map .mlx -> matlab
+    if vim.filetype and vim.filetype.add then
+        vim.filetype.add {
+            extension = {
+                mlx = "matlab",
+            },
+        }
+    end
+
+
+    -- mason setup (keep your ensure_installed list)
+    mason_lsp.setup({
         ensure_installed = {
-            -- Core
-            "lua_ls",
-            "pyright",
-            "clangd",
-            "jdtls",
-
-            -- General
-            "bashls",
-            "jsonls",
-            "yamlls",
-            "marksman",
-            "cmake",
-            "mesonlsp",
-
-            -- Web
-            "ts_ls",
-            "html",
-            "cssls",
-            "eslint",
-
-            -- DevOps
-            "dockerls",
-            "terraformls",
+            "lua_ls", "pyright", "clangd", "jdtls",
+            "bashls", "jsonls", "yamlls", "marksman", "cmake", "mesonlsp",
+            "ts_ls", "html", "cssls", "eslint",
+            "dockerls", "terraformls",
         },
+        automatic_enable = true,
     })
 
+
+    -- your BufWritePost notifier (unchanged)
     vim.api.nvim_create_autocmd({ "BufWritePost" }, {
         callback = function(args)
             for _, client in ipairs(vim.lsp.get_clients({ bufnr = args.buf })) do
@@ -39,7 +32,7 @@ return function()
                     changes = {
                         {
                             uri = vim.uri_from_bufnr(args.buf),
-                            type = 1, -- Created or Changed
+                            type = 1,
                         },
                     },
                 })
