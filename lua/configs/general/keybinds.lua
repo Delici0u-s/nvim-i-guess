@@ -10,7 +10,7 @@ kb.map(
 )
 
 -- save on ctrl s
-kb.map("n", "<C-S>", ":w<cr>", { silent = true })
+kb.map("n", "<C-S>", ":w<cr>@s", { silent = true })
 kb.map("i", "<C-S>", function()
     -- Exit insert mode
     vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", true)
@@ -26,6 +26,7 @@ end, { silent = true })
 
 -- exit terminal insert mode
 kb.map("t", "<C-X>", "<C-\\><C-n>", { silent = true })
+kb.map("n", "<C-X>", ":x<cr>", { silent = true })
 
 -- open terminal in vertical split
 kb.map("n", "vt", function()

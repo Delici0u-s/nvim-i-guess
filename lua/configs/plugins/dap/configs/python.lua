@@ -3,6 +3,7 @@ return {
     {
         name = "Python: Launch (integrated terminal)",
         type = "python",
+        command = "python3",
         request = "launch",
         program = function()
             -- default to current buffer file, prompt to override
@@ -26,6 +27,7 @@ return {
     {
         name = "Python: Launch (external terminal)",
         type = "python",
+        command = "python3",
         request = "launch",
         program = function()
             return vim.fn.input("Path to file: ", vim.fn.expand("%:p"), "file")
@@ -46,6 +48,7 @@ return {
     {
         name = "Python: Attach (127.0.0.1:5678)",
         type = "python",
+        command = "python3",
         request = "attach",
         connect = {
             host = "127.0.0.1",
