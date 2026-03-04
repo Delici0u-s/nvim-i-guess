@@ -34,14 +34,8 @@ kb.map("n", "vt", function()
     vim.cmd("terminal")
 end, { desc = "Vertical terminal" })
 
--- open terminal in vertical split
-kb.map("n", "vt", function()
-    vim.cmd("vsplit")
-    vim.cmd("terminal")
-end, { desc = "Vertical terminal" })
-
 -- open terminal in horizontal split
-kb.map("n", "ht", function()
+kb.map("n", "vht", function()
     vim.cmd("split") -- corrected command
     vim.cmd("terminal")
 end, { desc = "Horizontal terminal" })
