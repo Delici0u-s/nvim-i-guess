@@ -130,12 +130,14 @@ return {
         opts = {},
         config = require("configs.plugins.cf_render_markdown")
     },
-    -- {
-    --     'sontungexpt/better-diagnostic-virtual-text',
-    --     config = function(_)
-    --         require('configs.plugins.cf_better_diagnostic_virtual_text')()
-    --     end
-    -- },
+    {
+        'sontungexpt/better-diagnostic-virtual-text',
+        config = function(_)
+            require('configs.plugins.cf_better_diagnostic_virtual_text')()
+        end
+    },
+    -- debugging
+    -- shitzo
     {
         "mfussenegger/nvim-dap",
         event = "VeryLazy",

@@ -7,9 +7,9 @@ return function()
             arrow = "  ",
             up_arrow = "  ",
             down_arrow = "  ",
-            above = true, -- the virtual text will be displayed above the line
+            above = false, -- the virtual text will be displayed above the line
         },
-        priority = 2003,  -- the priority of virtual text
+        priority = 2003,   -- the priority of virtual text
         inline = false,
     })
 end
