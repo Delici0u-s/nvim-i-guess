@@ -148,4 +148,5 @@ return {
 
         config = require("configs.plugins.dap.init")
     },
+    { "WhoIsSethDaniel/mason-tool-installer.nvim" },
 }
