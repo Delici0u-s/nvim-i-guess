@@ -28,17 +28,25 @@ end, { silent = true })
 kb.map("t", "<C-X>", "<C-\\><C-n>", { silent = true })
 kb.map("n", "<C-X>", ":x<cr>", { silent = true })
 
--- open terminal in vertical split
-kb.map("n", "vt", function()
-    vim.cmd("vsplit")
-    vim.cmd("terminal")
-end, { desc = "Vertical terminal" })
+-- -- open terminal in vertical split
+-- kb.map("n", "vt", function()
+--     vim.cmd("vsplit")
+--     vim.cmd("terminal")
+-- end, { desc = "Vertical terminal" })
+--
+-- -- open terminal in horizontal split
+-- kb.map("n", "vht", function()
+--     vim.cmd("split") -- corrected command
+--     vim.cmd("terminal")
+-- end, { desc = "Horizontal terminal" })
 
--- open terminal in horizontal split
-kb.map("n", "vht", function()
-    vim.cmd("split") -- corrected command
-    vim.cmd("terminal")
-end, { desc = "Horizontal terminal" })
+local function get_buf_dir()
+    local path = vim.api.nvim_buf_get_name(0)
+    if path == "" then
+        return vim.fn.getcwd()
+    end
+    return vim.fn.fnamemodify(path, ":p:h")
+end
 
 local terminals = {
     vertical = { buf = nil, win = nil },
@@ -47,34 +55,67 @@ local terminals = {
 
 local function toggle_terminal(direction)
     local term = terminals[direction]
-
-    -- If window exists → close it
     if term.win and vim.api.nvim_win_is_valid(term.win) then
         vim.api.nvim_win_close(term.win, true)
         term.win = nil
         return
     end
 
-    -- Open split
+    local dir = get_buf_dir() -- capture before switching windows
+
     if direction == "vertical" then
         vim.cmd("vsplit")
     else
         vim.cmd("split")
     end
-
     term.win = vim.api.nvim_get_current_win()
 
-    -- Create terminal buffer if needed
     if not term.buf or not vim.api.nvim_buf_is_valid(term.buf) then
+        vim.cmd("lcd " .. vim.fn.fnameescape(dir))
         vim.cmd("terminal")
         term.buf = vim.api.nvim_get_current_buf()
     else
         vim.api.nvim_win_set_buf(term.win, term.buf)
+        -- Send cd to the already-running shell
+        -- local chan = vim.bo[term.buf].channel
+        -- if chan and chan > 0 then
+        --     vim.fn.chansend(chan, "cd " .. vim.fn.shellescape(dir) .. "\n")
+        -- end
     end
 
     vim.cmd("startinsert")
 end
-
+--
+-- local function toggle_terminal(direction)
+--     local term = terminals[direction]
+--
+--     -- If window exists → close it
+--     if term.win and vim.api.nvim_win_is_valid(term.win) then
+--         vim.api.nvim_win_close(term.win, true)
+--         term.win = nil
+--         return
+--     end
+--
+--     -- Open split
+--     if direction == "vertical" then
+--         vim.cmd("vsplit")
+--     else
+--         vim.cmd("split")
+--     end
+--
+--     term.win = vim.api.nvim_get_current_win()
+--
+--     -- Create terminal buffer if needed
+--     if not term.buf or not vim.api.nvim_buf_is_valid(term.buf) then
+--         vim.cmd("terminal")
+--         term.buf = vim.api.nvim_get_current_buf()
+--     else
+--         vim.api.nvim_win_set_buf(term.win, term.buf)
+--     end
+--
+--     vim.cmd("startinsert")
+-- end
+--
 kb.map({ "n", "t" }, "<C-n>", function()
     toggle_terminal("vertical")
 end, { desc = "Toggle terminal (vertical)" })
