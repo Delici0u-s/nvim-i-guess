@@ -3,21 +3,21 @@ local kb = require("utils.keybinds")
 
 -- remove highlighting
 kb.map(
-    "n",
-    "<C-l>",
-    [[ (&hls && v:hlsearch ? ':nohls' : ':set hls')."\n" <BAR> redraw<CR>]],
-    { silent = true, expr = true }
+	"n",
+	"<C-l>",
+	[[ (&hls && v:hlsearch ? ':nohls' : ':set hls')."\n" <BAR> redraw<CR>]],
+	{ silent = true, expr = true }
 )
 
 -- save on ctrl s
 kb.map("n", "<C-S>", ":w<cr>@s", { silent = true })
 kb.map("i", "<C-S>", function()
-    -- Exit insert mode
-    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", true)
-    -- Save the file
-    vim.cmd("w")
-    -- Re-enter insert mode
-    vim.api.nvim_feedkeys("i", "n", true)
+	-- Exit insert mode
+	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", true)
+	-- Save the file
+	vim.cmd("w")
+	-- Re-enter insert mode
+	vim.api.nvim_feedkeys("i", "n", true)
 end, { silent = true })
 
 ----------------------------
@@ -41,49 +41,49 @@ kb.map("n", "<C-X>", ":x<cr>", { silent = true })
 -- end, { desc = "Horizontal terminal" })
 
 local function get_buf_dir()
-    local path = vim.api.nvim_buf_get_name(0)
-    if path == "" then
-        return vim.fn.getcwd()
-    end
-    return vim.fn.fnamemodify(path, ":p:h")
+	local path = vim.api.nvim_buf_get_name(0)
+	if path == "" then
+		return vim.fn.getcwd()
+	end
+	return vim.fn.fnamemodify(path, ":p:h")
 end
 
 local terminals = {
-    vertical = { buf = nil, win = nil },
-    horizontal = { buf = nil, win = nil },
+	vertical = { buf = nil, win = nil },
+	horizontal = { buf = nil, win = nil },
 }
 
 local function toggle_terminal(direction)
-    local term = terminals[direction]
-    if term.win and vim.api.nvim_win_is_valid(term.win) then
-        vim.api.nvim_win_close(term.win, true)
-        term.win = nil
-        return
-    end
+	local term = terminals[direction]
+	if term.win and vim.api.nvim_win_is_valid(term.win) then
+		vim.api.nvim_win_close(term.win, true)
+		term.win = nil
+		return
+	end
 
-    local dir = get_buf_dir() -- capture before switching windows
+	local dir = get_buf_dir() -- capture before switching windows
 
-    if direction == "vertical" then
-        vim.cmd("vsplit")
-    else
-        vim.cmd("split")
-    end
-    term.win = vim.api.nvim_get_current_win()
+	if direction == "vertical" then
+		vim.cmd("vsplit")
+	else
+		vim.cmd("split")
+	end
+	term.win = vim.api.nvim_get_current_win()
 
-    if not term.buf or not vim.api.nvim_buf_is_valid(term.buf) then
-        vim.cmd("lcd " .. vim.fn.fnameescape(dir))
-        vim.cmd("terminal")
-        term.buf = vim.api.nvim_get_current_buf()
-    else
-        vim.api.nvim_win_set_buf(term.win, term.buf)
-        -- Send cd to the already-running shell
-        -- local chan = vim.bo[term.buf].channel
-        -- if chan and chan > 0 then
-        --     vim.fn.chansend(chan, "cd " .. vim.fn.shellescape(dir) .. "\n")
-        -- end
-    end
+	if not term.buf or not vim.api.nvim_buf_is_valid(term.buf) then
+		vim.cmd("lcd " .. vim.fn.fnameescape(dir))
+		vim.cmd("terminal")
+		term.buf = vim.api.nvim_get_current_buf()
+	else
+		vim.api.nvim_win_set_buf(term.win, term.buf)
+		-- Send cd to the already-running shell
+		-- local chan = vim.bo[term.buf].channel
+		-- if chan and chan > 0 then
+		--     vim.fn.chansend(chan, "cd " .. vim.fn.shellescape(dir) .. "\n")
+		-- end
+	end
 
-    vim.cmd("startinsert")
+	vim.cmd("startinsert")
 end
 --
 -- local function toggle_terminal(direction)
@@ -117,14 +117,12 @@ end
 -- end
 --
 kb.map({ "n", "t" }, "<C-n>", function()
-    toggle_terminal("vertical")
+	toggle_terminal("vertical")
 end, { desc = "Toggle terminal (vertical)" })
 
 kb.map({ "n", "t" }, "<C-h>n", function()
-    toggle_terminal("horizontal")
+	toggle_terminal("horizontal")
 end, { desc = "Toggle terminal (horizontal)" })
-
-
 
 -------------------------------
 
@@ -132,15 +130,15 @@ end, { desc = "Toggle terminal (horizontal)" })
 -- temp:
 -- execute macro for key after this combo
 kb.map("n", "<C-a>", function()
-    -- Prompt for a single key without needing Enter
-    vim.api.nvim_echo({ { "Press macro register:", "Normal" } }, false, {})
-    local reg = vim.fn.getchar() -- gets the keycode
-    reg = vim.fn.nr2char(reg)    -- convert keycode to character
+	-- Prompt for a single key without needing Enter
+	vim.api.nvim_echo({ { "Press macro register:", "Normal" } }, false, {})
+	local reg = vim.fn.getchar() -- gets the keycode
+	reg = vim.fn.nr2char(reg) -- convert keycode to character
 
-    -- Run the macro if a key was pressed
-    if reg ~= "" then
-        vim.api.nvim_feedkeys("@" .. reg, "n", true)
-    end
+	-- Run the macro if a key was pressed
+	if reg ~= "" then
+		vim.api.nvim_feedkeys("@" .. reg, "n", true)
+	end
 end, { silent = true })
 
 -- Requires which-key or can be done with normal maps using <C-h>x style
