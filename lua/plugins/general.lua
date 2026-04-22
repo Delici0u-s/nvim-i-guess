@@ -171,6 +171,7 @@ return {
 		build = "pip3 install --user .",
 		-- build = "uv pip install . --python=$HOME/.virtualenvs/jupynium/bin/python",
 		-- build = "conda run --no-capture-output -n jupynium pip install .",
+		config = require("configs.plugins.cf_jupynium"),
 	},
 	"rcarriga/nvim-notify", -- optional
 	"stevearc/dressing.nvim", -- optional, UI for :JupyniumKernelSelect

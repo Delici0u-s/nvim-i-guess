@@ -51,3 +51,15 @@
 - Zig
 - Docker — for `dockerls`
 - Terraform — for `terraformls`
+
+## Things to remember
+- Jupiter Notebook
+    - `:JupyniumStartAndAttachToServer`
+    - `:JupyniumStartSync <opt filename>`
+    - `# %%` for code block
+    - `<space>x` to execude code block and see results in firefox
+    - `.ju.py` as filename
+    - to convert .ipynb to .ju.py:
+        - open `.ipynb` in browser after start and attach server
+        - in ner nvim buffer run `:JupyniumLoadFromIpynbTab`
+        - save buffer
