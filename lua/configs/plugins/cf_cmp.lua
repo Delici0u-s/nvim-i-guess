@@ -72,13 +72,22 @@ function M.setup()
 		},
 
 		sources = cmp.config.sources({
-			{ name = "nvim_lsp" },
+			{ name = "jupynium", priority = 1000 },
+			{ name = "nvim_lsp", priority = 100 },
 			{ name = "luasnip" },
 			{ name = "buffer" },
 			{ name = "path" },
 		}, {
 			{ name = "buffer" },
 		}),
+		sorting = {
+			priority_weight = 1.0,
+			comparators = {
+				cmp.config.compare.score,
+				cmp.config.compare.recently_used,
+				cmp.config.compare.locality,
+			},
+		},
 		-- sources = cmp.config.sources({
 		--   { name = "nvim_lsp" },
 		--   { name = "luasnip" },

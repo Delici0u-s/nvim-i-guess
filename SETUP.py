@@ -67,6 +67,7 @@ def main() -> int:
     total_missing += check_group("Recommended", RECOMMENDED)
     check_group("Optional", OPTIONAL)  # not counted as failures
 
+    print("Jupiter notebook support: https://github.com/kiyoon/jupynium.nvim")
     print()
     if shutil.which("nvim") and not nvim_version_ok():
         print("  ⚠  Neovim found but version is < 0.9 — upgrade recommended.")
