@@ -1,11 +1,11 @@
-vim.api.nvim_create_user_command("themeSwitch", function()
+vim.api.nvim_create_user_command("ThemeSwitch", function()
 	local theme = require("configs.theme")
 	local next_mode = (vim.g.theme_mode == "dark") and "light" or "dark"
 	theme.apply_mode(next_mode)
 	vim.notify("Theme → " .. next_mode .. "  (session only)", vim.log.levels.INFO)
 end, { desc = "Toggle dark/light theme for this session" })
 
-vim.api.nvim_create_user_command("themeSwitchPermanent", function()
+vim.api.nvim_create_user_command("ThemeSwitchPermanent", function()
 	local theme = require("configs.theme")
 	local next_mode = (vim.g.theme_mode == "dark") and "light" or "dark"
 
