@@ -175,4 +175,17 @@ return {
 	},
 	"rcarriga/nvim-notify", -- optional
 	"stevearc/dressing.nvim", -- optional, UI for :JupyniumKernelSelect
+	{
+		"Delici0u-s/typing-transformer.nvim",
+		opts = {
+			global = {
+				'"  |)"  -> ")|"',
+			},
+			filetype = {
+				lua = {
+					'"test|" -> "successful|"',
+				},
+			},
+		},
+	},
 }
