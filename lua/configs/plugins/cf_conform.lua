@@ -84,36 +84,54 @@ return function()
 	---------------------------------------------------------------------------
 	-- Setup
 	---------------------------------------------------------------------------
+	conform.formatters.zigfmt = {
+		command = "zig",
+		args = { "fmt", "--stdin" },
+		stdin = true,
+	}
 
 	conform.setup({
 		formatters_by_ft = {
-			-- Simple
 			lua = safe("stylua"),
-
-			-- Sequential (run all that are available)
 			go = safe({ "goimports", "gofmt" }),
-
-			-- Formatter with options
 			rust = safe("rustfmt", { lsp_format = "fallback" }),
-
-			-- Priority with rich config
 			python = safe_priority({
+
 				"ruff_format",
 				{
 					names = { "isort", "black" },
 					opts = { lsp_format = "fallback" },
 				},
 			}),
-
-			-- Run everywhere if available
-			["*"] = safe("codespell"),
-
-			-- True fallback (only used if nothing else matches)
-			["_"] = safe("trim_whitespace"),
-
 			c = safe("clang-format"),
 			cpp = safe("clang-format"),
+			zig = safe("zigfmt"), -- <-- this was never added
+			["*"] = safe("codespell"),
+			["_"] = safe("trim_whitespace"),
 		},
+		-- formatters_by_ft = {
+		-- 	-- Simple
+		-- 	lua = safe("stylua"),
+		--
+		-- 	-- Sequential (run all that are available)
+		-- 	go = safe({ "goimports", "gofmt" }),
+		--
+		-- 	-- Formatter with options
+		-- 	rust = safe("rustfmt", { lsp_format = "fallback" }),
+		--
+		-- 	-- Priority with rich config
+		-- 	python = safe_priority({
+		-- 	}),
+		--
+		-- 	-- Run everywhere if available
+		-- 	["*"] = safe("codespell"),
+		--
+		-- 	-- True fallback (only used if nothing else matches)
+		-- 	["_"] = safe("trim_whitespace"),
+		--
+		-- 	c = safe("clang-format"),
+		-- 	cpp = safe("clang-format"),
+		-- },
 
 		format_on_save = {
 			lsp_format = "fallback",

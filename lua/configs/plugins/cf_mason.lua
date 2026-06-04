@@ -31,6 +31,7 @@ return function()
 			"dockerls",
 			"terraformls",
 			"asm_lsp",
+			"zls",
 		},
 		automatic_enable = true,
 	})
@@ -57,6 +58,16 @@ return function()
 			["asm-lsp"] = {
 				architecture = "x86_64",
 				assembler = "nasm",
+			},
+		},
+	})
+
+	vim.lsp.config("zls", {
+		filetypes = { "zig", "zir" },
+		settings = {
+			zls = {
+				enable_inlay_hints = true,
+				enable_snippets = true,
 			},
 		},
 	})
