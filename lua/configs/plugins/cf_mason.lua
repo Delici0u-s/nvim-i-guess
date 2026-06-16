@@ -71,4 +71,24 @@ return function()
 			},
 		},
 	})
+
+	-- add to your init.lua or a filetype.lua
+	-- vim.filetype.add({
+	-- 	extension = {
+	-- 		sage = "python",
+	-- 	},
+	-- })
+	-- vim.lsp.config("pyright", {
+	-- 	settings = {
+	-- 		python = {
+	-- 			analysis = {
+	-- 				extraPaths = {
+	-- 					-- path from `sage --root`/local/lib/python*/site-packages
+	-- 					vim.fn.expand("~/.conda/envs/sage/lib/python3.12/site-packages"),
+	-- 				},
+	-- 				typeCheckingMode = "off", -- sage is mostly untyped, strict mode is noise
+	-- 			},
+	-- 		},
+	-- 	},
+	-- })
 end
