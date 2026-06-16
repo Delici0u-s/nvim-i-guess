@@ -10,6 +10,8 @@ return function()
 		textobjects = {
 			use_default_keybindings = false,
 		},
+		firefox_profiles_ini_path = vim.fn.expand("~/.mozilla/firefox/profiles.ini"),
+		firefox_profile_name = "Jupynium",
 	})
 
 	kb.map(
