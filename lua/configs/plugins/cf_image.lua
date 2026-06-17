@@ -10,7 +10,7 @@ return function()
 			-- output rendering doesn't go through these integrations, so this is
 			-- purely about whether plain markdown image links also preview inline.
 			markdown = {
-				enabled = true,
+				enabled = false,
 				clear_in_insert_mode = false,
 				download_remote_images = true,
 				only_render_image_at_cursor = false,
@@ -19,14 +19,14 @@ return function()
 			neorg = { enabled = false },
 		},
 
-		max_width = nil,
-		max_height = nil,
-		max_width_window_percentage = nil,
-		max_height_window_percentage = 50,
-		window_overlap_clear_enabled = true,
+		max_width = 100,
+		max_height = 12,
+		max_height_window_percentage = math.huge,
+		max_width_window_percentage = math.huge,
+		window_overlap_clear_enabled = false,
 		window_overlap_clear_ft_ignore = { "cmp_menu", "cmp_docs", "" },
 
-		editor_only_render_when_focused = true, -- avoid leftover images when nvim loses focus
+		editor_only_render_when_focused = false, -- avoid leftover images when nvim loses focus
 		tmux_show_only_in_active_window = true,
 	})
 end
