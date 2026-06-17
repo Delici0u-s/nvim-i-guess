@@ -72,7 +72,6 @@ function M.setup()
 		},
 
 		sources = cmp.config.sources({
-			{ name = "jupynium", priority = 1000 },
 			{ name = "nvim_lsp", priority = 100 },
 			{ name = "luasnip" },
 			{ name = "buffer" },
@@ -88,12 +87,6 @@ function M.setup()
 				cmp.config.compare.locality,
 			},
 		},
-		-- sources = cmp.config.sources({
-		--   { name = "nvim_lsp" },
-		--   { name = "luasnip" },
-		--   { name = "buffer" },
-		--   { name = "path" },
-		-- }),
 	})
 
 	-- vim.notify("cf_cmp.setup() finished", vim.log.levels.INFO)

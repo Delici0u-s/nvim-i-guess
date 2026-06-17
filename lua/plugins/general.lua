@@ -2,7 +2,7 @@ return {
 	{
 		"nvim-treesitter/nvim-treesitter",
 		lazy = false,
-		branch = "main",
+		branch = "master",
 		build = ":TSUpdate",
 	},
 	-- {
@@ -150,31 +150,22 @@ return {
 	},
 	{ "WhoIsSethDaniel/mason-tool-installer.nvim" },
 	-- lazy.nvim spec (add as dependency of your nvim-treesitter entry)
-	{
-		"MeanderingProgrammer/treesitter-modules.nvim",
-		dependencies = { "nvim-treesitter/nvim-treesitter" },
-		config = require("configs.plugins.cf_treesitter_modules"),
-		-- opts = {
-		-- 	incremental_selection = {
-		-- 		enable = true,
-		-- 		keymaps = {
-		-- 			init_selection = "<CR>",
-		-- 			node_incremental = "<C-w>",
-		-- 			node_decremental = "<C-S-w>",
-		-- 			scope_incremental = false,
-		-- 		},
-		-- 	},
-		-- },
-	},
-	{
-		"kiyoon/jupynium.nvim",
-		build = "pip3 install --user .",
-		-- build = "uv pip install . --python=$HOME/.virtualenvs/jupynium/bin/python",
-		-- build = "conda run --no-capture-output -n jupynium pip install .",
-		config = require("configs.plugins.cf_jupynium"),
-	},
-	"rcarriga/nvim-notify", -- optional
-	"stevearc/dressing.nvim", -- optional, UI for :JupyniumKernelSelect
+	-- {
+	-- 	"MeanderingProgrammer/treesitter-modules.nvim",
+	-- 	dependencies = { "nvim-treesitter/nvim-treesitter" },
+	-- 	config = require("configs.plugins.cf_treesitter_modules"),
+	-- 	-- opts = {
+	-- 	-- 	incremental_selection = {
+	-- 	-- 		enable = true,
+	-- 	-- 		keymaps = {
+	-- 	-- 			init_selection = "<CR>",
+	-- 	-- 			node_incremental = "<C-w>",
+	-- 	-- 			node_decremental = "<C-S-w>",
+	-- 	-- 			scope_incremental = false,
+	-- 	-- 		},
+	-- 	-- 	},
+	-- 	-- },
+	-- },
 	{
 		"Delici0u-s/typing-transformer.nvim",
 		opts = {
@@ -195,5 +186,39 @@ return {
 		dependencies = { "kevinhwang91/promise-async" },
 		event = "VeryLazy",
 		config = require("configs.plugins.cf_ufo"),
+	},
+	-- ===========================================================================
+	-- IMAGE RENDERING (required by Molten for inline plot/image output)
+	-- ===========================================================================
+	{
+		"3rd/image.nvim",
+		opts = {}, -- actual setup happens in cf_image.lua via config below
+		config = require("configs.plugins.cf_image"),
+	},
+
+	-- ===========================================================================
+	-- MOLTEN (replaces jupynium.nvim)
+	-- ===========================================================================
+	{
+		"benlubas/molten-nvim",
+		version = "^1.0.0", -- avoid breaking changes from 2.x; bump deliberately later
+		dependencies = { "3rd/image.nvim" },
+		build = ":UpdateRemotePlugins",
+		init = require("configs.plugins.cf_molten").init,
+		config = require("configs.plugins.cf_molten").config,
+	},
+	"rcarriga/nvim-notify", -- still useful generally; keep
+	"stevearc/dressing.nvim", -- still useful for vim.ui.input/select prompts (used in cf_molten.lua)
+
+	-- ===========================================================================
+	-- SNACKS.NVIM
+	-- ===========================================================================
+	{
+		"folke/snacks.nvim",
+		priority = 1000,
+		lazy = false,
+		config = function()
+			require("configs.plugins.cf_snacks")()
+		end,
 	},
 }
