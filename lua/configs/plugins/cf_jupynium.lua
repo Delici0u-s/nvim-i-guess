@@ -20,14 +20,14 @@ return function()
 	-- the correct file even if the user changes directories (:cd) mid-session.
 	local notebook_name = "nvim_jupynotebook"
 	local notebook_path = vim.fn.fnamemodify(notebook_name .. ".ipynb", ":p")
+	local checkpoints_dir = vim.fn.fnamemodify(notebook_path, ":h") .. "/.ipynb_checkpoints"
 
-	-- =========================================================================
-	-- 3. HELPER FUNCTIONS
-	-- =========================================================================
-	-- Safely deletes the notebook file if it exists
 	local function clean_notebook_file()
 		if vim.fn.filereadable(notebook_path) == 1 then
 			vim.fn.delete(notebook_path)
+		end
+		if vim.fn.isdirectory(checkpoints_dir) == 1 then
+			vim.fn.delete(checkpoints_dir, "rf")
 		end
 	end
 
