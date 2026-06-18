@@ -191,6 +191,7 @@ return {
 	-- IMAGE RENDERING (required by Molten for inline plot/image output)
 	-- ===========================================================================
 	{
+		-- dir = "/home/quad/cus/programming/gits/own/image.nvim",
 		"3rd/image.nvim",
 		opts = {}, -- actual setup happens in cf_image.lua via config below
 		config = require("configs.plugins.cf_image"),
@@ -200,9 +201,15 @@ return {
 	-- MOLTEN (replaces jupynium.nvim)
 	-- ===========================================================================
 	{
-		"benlubas/molten-nvim",
+		-- "benlubas/molten-nvim",
+		dir = "/home/quad/cus/programming/gits/own/molten-nvim",
+
 		version = "^1.0.0", -- avoid breaking changes from 2.x; bump deliberately later
-		dependencies = { "3rd/image.nvim" },
+		dependencies = {
+			-- dir = "/home/quad/cus/programming/gits/own/image.nvim",
+
+			"3rd/image.nvim",
+		},
 		build = ":UpdateRemotePlugins",
 		init = require("configs.plugins.cf_molten").init,
 		config = require("configs.plugins.cf_molten").config,

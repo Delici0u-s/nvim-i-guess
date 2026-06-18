@@ -109,7 +109,7 @@ function M.config()
 		desc = "Molten: Re-evaluate cell",
 	})
 
-	kb.map("n", "<space>jc", "<cmd>MoltenEvaluateLine<CR>", {
+	kb.map("n", "<space>jC", "<cmd>MoltenEvaluateLine<CR>", {
 		silent = true,
 		desc = "Molten: Evaluate line",
 	})
@@ -125,7 +125,7 @@ function M.config()
 		desc = "Next cell",
 	})
 
-	kb.map("n", "<space>jc", function()
+	kb.map("n", "<space>kc", function()
 		vim.fn.search("^# %%", "bW")
 	end, {
 		silent = true,
