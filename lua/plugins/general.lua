@@ -182,6 +182,15 @@ return {
 		},
 	},
 	{
+		"kiyoon/jupynium.nvim",
+		build = "pip3 install --user .",
+		-- build = "uv pip install . --python=$HOME/.virtualenvs/jupynium/bin/python",
+		-- build = "conda run --no-capture-output -n jupynium pip install .",
+		config = require("configs.plugins.cf_jupynium"),
+	},
+	"rcarriga/nvim-notify", -- optional
+	"stevearc/dressing.nvim", -- optional, UI for :JupyniumKernelSelect
+	{
 		"kevinhwang91/nvim-ufo",
 		dependencies = { "kevinhwang91/promise-async" },
 		event = "VeryLazy",
@@ -200,22 +209,22 @@ return {
 	-- ===========================================================================
 	-- MOLTEN (replaces jupynium.nvim)
 	-- ===========================================================================
-	{
-		-- "benlubas/molten-nvim",
-		dir = "/home/quad/cus/programming/gits/own/molten-nvim",
-
-		version = "^1.0.0", -- avoid breaking changes from 2.x; bump deliberately later
-		dependencies = {
-			-- dir = "/home/quad/cus/programming/gits/own/image.nvim",
-
-			"3rd/image.nvim",
-		},
-		build = ":UpdateRemotePlugins",
-		init = require("configs.plugins.cf_molten").init,
-		config = require("configs.plugins.cf_molten").config,
-	},
-	"rcarriga/nvim-notify", -- still useful generally; keep
-	"stevearc/dressing.nvim", -- still useful for vim.ui.input/select prompts (used in cf_molten.lua)
+	-- {
+	-- 	"benlubas/molten-nvim",
+	-- 	-- dir = "/home/quad/cus/programming/gits/own/molten-nvim",
+	--
+	-- 	version = "^1.0.0", -- avoid breaking changes from 2.x; bump deliberately later
+	-- 	dependencies = {
+	-- 		-- dir = "/home/quad/cus/programming/gits/own/image.nvim",
+	--
+	-- 		"3rd/image.nvim",
+	-- 	},
+	-- 	build = ":UpdateRemotePlugins",
+	-- 	init = require("configs.plugins.cf_molten").init,
+	-- 	config = require("configs.plugins.cf_molten").config,
+	-- },
+	-- "rcarriga/nvim-notify", -- still useful generally; keep
+	-- "stevearc/dressing.nvim", -- still useful for vim.ui.input/select prompts (used in cf_molten.lua)
 
 	-- ===========================================================================
 	-- SNACKS.NVIM
