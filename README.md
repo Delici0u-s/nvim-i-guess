@@ -1,7 +1,13 @@
 # Requirements
 
+> Structure: `init.lua` → `lua/configs/` (core → theme → lsp → keymaps → plugins).
+> Plugin *specs* live in `lua/plugins/`; plugin *configs* live in
+> `lua/configs/plugins/{ui,editor,lang,tools}/` and load only via their spec.
+> See `STRUCTURE.md` for the full tree and the two rules that govern it.
+
+
 ## Core
-- Neovim ≥ 0.9 (0.10+ recommended)
+- Neovim ≥ 0.11.3 (uses `vim.lsp.config` / `vim.lsp.enable`)
 - git
 - Node.js (npm) — required for `ts_ls`, `eslint`, `html`, `cssls`
 - tree-sitter-cli
@@ -37,7 +43,6 @@
 | `clang-format` | C / C++ |
 | `goimports`, `gofmt` | Go |
 | `rustfmt` | Rust |
-| `codespell` | All files (spellcheck) |
 
 # Recommended
 

@@ -1,23 +1,71 @@
 return {
+	-- ===========================================================================
+	-- TREESITTER
+	-- ===========================================================================
 	{
 		"nvim-treesitter/nvim-treesitter",
-		lazy = false,
-		branch = "master",
+		lazy = false, -- highlighting must exist for the first buffer drawn
+		branch = "master", -- cf_tree_sitter.lua uses master-only API
 		build = ":TSUpdate",
+		config = function()
+			require("configs.plugins.lang.treesitter")()
+		end,
 	},
-	-- {
-	-- 	"neovim/nvim-lspconfig",
-	-- 	lazy = false;
-	-- 	config = function()
-	-- 	  require("configs.plugins.cf_lspconfig")()
-	-- 	end
-	-- },
+
+	-- ===========================================================================
+	-- LSP / MASON
+	-- ===========================================================================
+	{
+		-- Not lazy: configs/general/lsp_capabilities.lua requires this at startup
+		-- to build the global capabilities table before any server is enabled.
+		-- It is a small module that returns a table; there is no real cost.
+		"hrsh7th/cmp-nvim-lsp",
+		lazy = false,
+		priority = 900,
+	},
+	{
+		"mason-org/mason.nvim",
+		cmd = { "Mason", "MasonInstall", "MasonUpdate", "MasonLog" },
+		opts = {},
+	},
+	{
+		"mason-org/mason-lspconfig.nvim",
+		event = { "BufReadPre", "BufNewFile" },
+		dependencies = {
+			"mason-org/mason.nvim",
+			"neovim/nvim-lspconfig",
+		},
+		config = function()
+			require("configs.plugins.lang.mason")()
+		end,
+	},
+	{
+		"WhoIsSethDaniel/mason-tool-installer.nvim",
+		event = "VeryLazy",
+		dependencies = { "mason-org/mason.nvim" },
+		config = function()
+			require("configs.plugins.lang.mason_tools")()
+		end,
+	},
+	{
+		"folke/lazydev.nvim",
+		ft = "lua",
+		config = function()
+			require("configs.plugins.lang.lazydev")()
+		end,
+	},
+
+	-- ===========================================================================
+	-- COMPLETION / SNIPPETS
+	-- ===========================================================================
 	{
 		"L3MON4D3/LuaSnip",
-		-- follow latest release.
-		version = "v2.4.1", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
-		-- install jsregexp (optional!).
+		version = "v2.4.1",
 		build = "make install_jsregexp",
+		event = "InsertEnter",
+		config = function()
+			require("configs.plugins.editor.luasnip")()
+		end,
 	},
 	{
 		"hrsh7th/nvim-cmp",
@@ -28,64 +76,10 @@ return {
 			"hrsh7th/cmp-path",
 			"hrsh7th/cmp-cmdline",
 			"saadparwaiz1/cmp_luasnip",
-			-- "rafamadriz/friendly-snippets",
+			"L3MON4D3/LuaSnip",
 		},
 		config = function()
-			-- local cmp_caps = require("cmp_nvim_lsp").default_capabilities()
-			-- vim.lsp.config("*", { capabilities = cmp_caps })
-			-- full config shown below (copy it into here or require a separate file)
-			require("configs.plugins.cf_cmp")()
-		end,
-	},
-	{
-		"nvim-lualine/lualine.nvim",
-		dependencies = { "nvim-tree/nvim-web-devicons" },
-	},
-	{
-		"luukvbaal/statuscol.nvim",
-		config = function()
-			require("configs.plugins.cf_statuscol")()
-		end,
-	},
-	{
-		"folke/lazydev.nvim",
-		ft = "lua",
-		config = function()
-			require("configs.plugins.cf_lazydev")()
-		end,
-	},
-	{
-		"williamboman/mason.nvim",
-		lazy = false,
-		config = function()
-			require("mason").setup()
-		end,
-	},
-	{
-		"mason-org/mason-lspconfig.nvim",
-		opts = {},
-		dependencies = {
-			{ "mason-org/mason.nvim", opts = {} },
-			"neovim/nvim-lspconfig",
-		},
-		config = function()
-			require("configs.plugins.cf_mason")()
-		end,
-	},
-	{
-		"nvim-telescope/telescope.nvim",
-		tag = "v0.2.0",
-		dependencies = { "nvim-lua/plenary.nvim" },
-	},
-	{
-		"folke/which-key.nvim",
-		event = "VeryLazy",
-	},
-	{
-		"stevearc/conform.nvim",
-		opts = {},
-		config = function()
-			require("configs.plugins.cf_conform")()
+			require("configs.plugins.editor.cmp")()
 		end,
 	},
 	{
@@ -94,80 +88,97 @@ return {
 		opts = {},
 	},
 	{
-		"williamboman/mason.nvim",
-		config = true,
+		"ray-x/lsp_signature.nvim",
+		event = "InsertEnter",
+		config = function()
+			require("configs.plugins.editor.lsp_signature")()
+		end,
+	},
+
+	-- ===========================================================================
+	-- FORMATTING
+	-- ===========================================================================
+	{
+		"stevearc/conform.nvim",
+		event = { "BufWritePre" },
+		cmd = { "ConformInfo" },
+		config = function()
+			require("configs.plugins.editor.conform")()
+		end,
+	},
+
+	-- ===========================================================================
+	-- UI
+	-- ===========================================================================
+	{
+		"folke/snacks.nvim",
+		priority = 1000,
+		lazy = false, -- owns vim.notify and the picker; must be up early
+		config = function()
+			require("configs.plugins.ui.snacks")()
+		end,
+	},
+	{
+		"nvim-lualine/lualine.nvim",
+		dependencies = { "nvim-tree/nvim-web-devicons" },
+		event = "VeryLazy",
+		config = function()
+			require("configs.plugins.ui.lualine")()
+		end,
+	},
+	{
+		"luukvbaal/statuscol.nvim",
+		event = { "BufReadPost", "BufNewFile" },
+		config = function()
+			require("configs.plugins.ui.statuscol")()
+		end,
 	},
 	{
 		"lukas-reineke/indent-blankline.nvim",
 		main = "ibl",
-		---@module "ibl"
-		---@type ibl.config
-		opts = {},
+		event = { "BufReadPost", "BufNewFile" },
 		config = function()
-			require("configs.plugins.cf_indent_blankline")()
+			require("configs.plugins.ui.indent_blankline")()
 		end,
 	},
 	{
-		"ray-x/lsp_signature.nvim",
-		event = "InsertEnter",
-		opts = {},
-		config = require("configs.plugins.cf_lsp_signature"),
+		"folke/which-key.nvim",
+		event = "VeryLazy",
+		opts = {
+			-- Popup delay is independent of 'timeoutlen'. Keep it long enough
+			-- that which-key never appears during normal fast typing on the
+			-- <C-t>/<C-h>/<C-v>/<C-e> prefixes -- it only shows if you actually
+			-- pause. Set to 0 if you want it to appear immediately instead.
+			delay = 500,
+		},
 	},
-	-- {
-	--     "azratul/live-share.nvim",
-	--     dependencies = {
-	--         "jbyuki/instant.nvim",
-	--     },
-	--     config = require("configs.plugins.cf_live_share")
-	-- },
+	{
+		"kevinhwang91/nvim-ufo",
+		dependencies = { "kevinhwang91/promise-async" },
+		event = { "BufReadPost", "BufNewFile" },
+		config = function()
+			require("configs.plugins.ui.ufo")()
+		end,
+	},
 	{
 		"MeanderingProgrammer/render-markdown.nvim",
-		dependencies = { "nvim-treesitter/nvim-treesitter", "nvim-mini/mini.nvim" }, -- if you use the mini.nvim suite
-		-- dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-mini/mini.icons' },        -- if you use standalone mini plugins
-		-- dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' }, -- if you prefer nvim-web-devicons
-		---@module 'render-markdown'
-		---@type render.md.UserConfig
-		opts = {},
-		config = require("configs.plugins.cf_render_markdown"),
+		dependencies = { "nvim-treesitter/nvim-treesitter", "nvim-mini/mini.nvim" },
+		ft = { "markdown", "quarto" },
+		config = function()
+			require("configs.plugins.ui.render_markdown")()
+		end,
 	},
-	-- {
-	--     'sontungexpt/better-diagnostic-virtual-text',
-	--     config = function(_)
-	--         require('configs.plugins.cf_better_diagnostic_virtual_text')()
-	--     end
-	-- },
 	{
-		"mfussenegger/nvim-dap",
+		"stevearc/dressing.nvim",
 		event = "VeryLazy",
-		dependencies = {
-			"rcarriga/nvim-dap-ui",
-			"nvim-neotest/nvim-nio",
-			"jay-babu/mason-nvim-dap.nvim",
-			"theHamsta/nvim-dap-virtual-text",
-		},
-
-		config = require("configs.plugins.dap.init"),
 	},
-	{ "WhoIsSethDaniel/mason-tool-installer.nvim" },
-	-- lazy.nvim spec (add as dependency of your nvim-treesitter entry)
-	-- {
-	-- 	"MeanderingProgrammer/treesitter-modules.nvim",
-	-- 	dependencies = { "nvim-treesitter/nvim-treesitter" },
-	-- 	config = require("configs.plugins.cf_treesitter_modules"),
-	-- 	-- opts = {
-	-- 	-- 	incremental_selection = {
-	-- 	-- 		enable = true,
-	-- 	-- 		keymaps = {
-	-- 	-- 			init_selection = "<CR>",
-	-- 	-- 			node_incremental = "<C-w>",
-	-- 	-- 			node_decremental = "<C-S-w>",
-	-- 	-- 			scope_incremental = false,
-	-- 	-- 		},
-	-- 	-- 	},
-	-- 	-- },
-	-- },
+
+	-- ===========================================================================
+	-- EDITING
+	-- ===========================================================================
 	{
 		"Delici0u-s/typing-transformer.nvim",
+		event = "InsertEnter",
 		opts = {
 			global = {
 				'"  |)"  -> ")|"',
@@ -181,60 +192,60 @@ return {
 			},
 		},
 	},
+
+	-- ===========================================================================
+	-- DEBUGGING
+	-- ===========================================================================
+	{
+		"mfussenegger/nvim-dap",
+		-- Must list every key defined in dap/keymaps.lua: a key not listed here
+		-- does nothing until some other <leader>d key loads the plugin first.
+		keys = {
+			{ "<leader>dt", desc = "DAP: toggle breakpoint" },
+			{ "<leader>dc", desc = "DAP: continue" },
+			{ "<leader>di", desc = "DAP: step into" },
+			{ "<leader>do", desc = "DAP: step over" },
+			{ "<leader>du", desc = "DAP: step out" },
+			{ "<leader>dr", desc = "DAP: open REPL" },
+			{ "<leader>dl", desc = "DAP: run last" },
+			{ "<leader>dq", desc = "DAP: terminate" },
+			{ "<leader>db", desc = "DAP: list breakpoints" },
+			{ "<leader>de", desc = "DAP: exception breakpoints" },
+		},
+		dependencies = {
+			"rcarriga/nvim-dap-ui",
+			"nvim-neotest/nvim-nio",
+			"jay-babu/mason-nvim-dap.nvim",
+			"theHamsta/nvim-dap-virtual-text",
+		},
+		config = function()
+			require("configs.plugins.tools.dap.init")()
+		end,
+	},
+
+	-- ===========================================================================
+	-- JUPYTER / IMAGES
+	-- ===========================================================================
+	{
+		"3rd/image.nvim",
+		ft = { "markdown", "quarto", "python", "ipynb" },
+		config = function()
+			require("configs.plugins.tools.image")()
+		end,
+	},
 	{
 		"kiyoon/jupynium.nvim",
 		build = "pip3 install --user .",
-		-- build = "uv pip install . --python=$HOME/.virtualenvs/jupynium/bin/python",
-		-- build = "conda run --no-capture-output -n jupynium pip install .",
-		config = require("configs.plugins.cf_jupynium"),
-	},
-	"rcarriga/nvim-notify", -- optional
-	"stevearc/dressing.nvim", -- optional, UI for :JupyniumKernelSelect
-	{
-		"kevinhwang91/nvim-ufo",
-		dependencies = { "kevinhwang91/promise-async" },
-		event = "VeryLazy",
-		config = require("configs.plugins.cf_ufo"),
-	},
-	-- ===========================================================================
-	-- IMAGE RENDERING (required by Molten for inline plot/image output)
-	-- ===========================================================================
-	{
-		-- dir = "/home/quad/cus/programming/gits/own/image.nvim",
-		"3rd/image.nvim",
-		opts = {}, -- actual setup happens in cf_image.lua via config below
-		config = require("configs.plugins.cf_image"),
-	},
-
-	-- ===========================================================================
-	-- MOLTEN (replaces jupynium.nvim)
-	-- ===========================================================================
-	-- {
-	-- 	"benlubas/molten-nvim",
-	-- 	-- dir = "/home/quad/cus/programming/gits/own/molten-nvim",
-	--
-	-- 	version = "^1.0.0", -- avoid breaking changes from 2.x; bump deliberately later
-	-- 	dependencies = {
-	-- 		-- dir = "/home/quad/cus/programming/gits/own/image.nvim",
-	--
-	-- 		"3rd/image.nvim",
-	-- 	},
-	-- 	build = ":UpdateRemotePlugins",
-	-- 	init = require("configs.plugins.cf_molten").init,
-	-- 	config = require("configs.plugins.cf_molten").config,
-	-- },
-	-- "rcarriga/nvim-notify", -- still useful generally; keep
-	-- "stevearc/dressing.nvim", -- still useful for vim.ui.input/select prompts (used in cf_molten.lua)
-
-	-- ===========================================================================
-	-- SNACKS.NVIM
-	-- ===========================================================================
-	{
-		"folke/snacks.nvim",
-		priority = 1000,
-		lazy = false,
+		cmd = {
+			"JupyniumStartAndAttachToServer",
+			"JupyniumStartSync",
+			"JupyniumAttachToServer",
+			"JupyniumKernelSelect",
+		},
+		ft = { "python", "ipynb" },
+		dependencies = { "rcarriga/nvim-notify" },
 		config = function()
-			require("configs.plugins.cf_snacks")()
+			require("configs.plugins.tools.jupynium")()
 		end,
 	},
 }

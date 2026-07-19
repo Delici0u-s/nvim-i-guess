@@ -1,7 +1,7 @@
 local M = {}
 
 -- defaults
-M._log_path = vim.fn.stdpath("cache") .. "\\nvimdebug.log"
+M._log_path = vim.fs.joinpath(vim.fn.stdpath("cache"), "nvimdebug.log")
 M._this_is_a_log_table = true
 M._fh = nil -- lazy initialized
 
