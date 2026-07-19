@@ -14,7 +14,8 @@ local M = {}
 -- regex list; keep them here so the toggle has something to restore.
 M.hidden = table.concat({
 	[[^\./$]],
-	[[^\.\./$]],
+	[[^\..*$]],
+	-- [[^\.\./$]],
 	[[^__pycache__/$]],
 	[[^\.git/$]],
 	[[^node_modules/$]],
@@ -31,11 +32,38 @@ vim.g.netrw_sizestyle = "H" -- human-readable sizes
 vim.g.netrw_localcopydircmd = "cp -r"
 
 --- Redraw the current netrw buffer so a global change takes effect.
+-- local function refresh()
+-- 	if vim.bo.filetype ~= "netrw" then
+-- 		return
+-- 	end
+-- 	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Plug>NetrwRefresh", true, false, true), "n", false)
+-- end
+--- Redraw the current netrw buffer so a global change takes effect.
+---
+--- Cursor position is restored by *name*, not line number: toggling hidden
+--- files changes how many entries precede the cursor, so the old line number
+--- points somewhere else after the redraw.
 local function refresh()
 	if vim.bo.filetype ~= "netrw" then
 		return
 	end
+
+	local entry = vim.fn.getline(".")
+
 	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Plug>NetrwRefresh", true, false, true), "n", false)
+
+	-- The redraw is queued by feedkeys, so restore after it drains.
+	vim.schedule(function()
+		if vim.bo.filetype ~= "netrw" or entry == "" then
+			return
+		end
+		local found = vim.fn.search("\\V\\^" .. vim.fn.escape(entry, "\\") .. "\\$", "cw")
+		if found == 0 then
+			-- Entry is now filtered out (you just hid it). Stay put rather than
+			-- jumping to line 1.
+			return
+		end
+	end)
 end
 
 --- Toggle whether hidden files are filtered out.
