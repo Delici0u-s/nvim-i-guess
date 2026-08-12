@@ -1,0 +1,22 @@
+===== Structure =====
+--- FILE ---
+header to indicate new file
+--- LOCATION ---
+optional, location
+--- CONTENT ---
+required, content if stuff
+
+===== FILES =====
+--- FILE ---
+--- LOCATION ---
+~/.config/asm-lsp/.asm-lsp.toml
+--- CONTENT ---
+[default_config]
+assembler = "nasm"
+instruction_set = "x86-64"
+
+[default_config.opts]
+compiler = "nasm"
+diagnostics = true
+default_diagnostics = true
+~ $ nvimdir

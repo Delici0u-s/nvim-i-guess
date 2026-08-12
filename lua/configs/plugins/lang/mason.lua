@@ -57,11 +57,11 @@ return function()
 	vim.lsp.config("asm_lsp", {
 		filetypes = { "asm", "nasm", "s", "S" },
 		settings = {
-			["asm-lsp"] = {
-				architecture = "x86_64",
-				assembler = "nasm",
-			},
+			["asm-lsp"] = { architecture = "x86_64", assembler = "nasm" },
 		},
+		on_attach = function(client)
+			client.server_capabilities.signatureHelpProvider = nil
+		end,
 	})
 
 	vim.lsp.config("zls", {
