@@ -48,9 +48,17 @@ return function()
 		end,
 
 		close_fold_kinds_for_ft = {
-			default = { "imports", "comment" },
+			default = {},
+			-- default = { "imports" },
+			-- -- doc-comment-heavy languages where collapsing is actually useful
+			-- java = { "imports", "comment" },
+			-- cpp = { "comment" },
 		},
-
+		-- close_fold_kinds_for_ft = {
+		-- 	default = { "imports", "comment" },
+		-- 	-- default = { "imports", "comment" },
+		-- },
+		--
 		preview = {
 			win_config = {
 				border = "rounded",
