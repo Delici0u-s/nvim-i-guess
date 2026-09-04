@@ -3,7 +3,6 @@ local M = {}
 local log = require("utils.log")
 
 function M.setup()
-
 	-- local ok, cmp = pcall(require, "cmp")
 	-- if not ok or not cmp then
 	--     log.write("nvim-cmp not available: " .. tostring(cmp))
@@ -82,8 +81,29 @@ function M.setup()
 			},
 		},
 	})
-
 end
+-- local function debug_lsp_completion()
+-- 	local clients = vim.lsp.get_clients({ bufnr = 0 })
+--
+-- 	for _, client in ipairs(clients) do
+-- 		if client:supports_method("textDocument/completion") then
+-- 			local params = vim.lsp.util.make_position_params(0, client.offset_encoding)
+--
+-- 			vim.lsp.buf_request(0, "textDocument/completion", params, function(err, result)
+-- 				vim.notify(
+-- 					vim.inspect({
+-- 						client = client.name,
+-- 						err = err,
+-- 						result = result,
+-- 					}),
+-- 					vim.log.levels.INFO
+-- 				)
+-- 			end)
+-- 		end
+-- 	end
+-- end
+--
+-- vim.keymap.set("i", "<C-M>", debug_lsp_completion, { buffer = true })
 
 -- keep same shape as your plugin config expects: require("configs.plugins.editor.cmp")()
 return function()
