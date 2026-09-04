@@ -76,6 +76,7 @@ return function()
 			zls = {
 				enable_inlay_hints = true,
 				enable_snippets = true,
+				-- enable_build_on_save = true, -- does nothing :(
 			},
 		},
 	})
