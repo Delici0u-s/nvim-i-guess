@@ -8,7 +8,7 @@ return {
 		branch = "master", -- cf_tree_sitter.lua uses master-only API
 		build = ":TSUpdate",
 		config = function()
-			require("configs.plugins.lang.treesitter")()
+			require("plugins.configs.lang.treesitter")()
 		end,
 	},
 
@@ -36,7 +36,7 @@ return {
 			"neovim/nvim-lspconfig",
 		},
 		config = function()
-			require("configs.plugins.lang.mason")()
+			require("plugins.configs.lang.mason")()
 		end,
 	},
 	{
@@ -44,14 +44,14 @@ return {
 		event = "VeryLazy",
 		dependencies = { "mason-org/mason.nvim" },
 		config = function()
-			require("configs.plugins.lang.mason_tools")()
+			require("plugins.configs.lang.mason_tools")()
 		end,
 	},
 	{
 		"folke/lazydev.nvim",
 		ft = "lua",
 		config = function()
-			require("configs.plugins.lang.lazydev")()
+			require("plugins.configs.lang.lazydev")()
 		end,
 	},
 
@@ -64,7 +64,7 @@ return {
 		build = "make install_jsregexp",
 		event = "InsertEnter",
 		config = function()
-			require("configs.plugins.editor.luasnip")()
+			require("plugins.configs.editor.luasnip")()
 		end,
 	},
 	{
@@ -79,7 +79,7 @@ return {
 			"L3MON4D3/LuaSnip",
 		},
 		config = function()
-			require("configs.plugins.editor.cmp")()
+			require("plugins.configs.editor.cmp")()
 		end,
 	},
 	{
@@ -91,7 +91,7 @@ return {
 		"ray-x/lsp_signature.nvim",
 		event = "InsertEnter",
 		config = function()
-			require("configs.plugins.editor.lsp_signature")()
+			require("plugins.configs.editor.lsp_signature")()
 		end,
 	},
 
@@ -103,7 +103,7 @@ return {
 		event = { "BufWritePre" },
 		cmd = { "ConformInfo" },
 		config = function()
-			require("configs.plugins.editor.conform")()
+			require("plugins.configs.editor.conform")()
 		end,
 	},
 
@@ -115,7 +115,7 @@ return {
 		priority = 1000,
 		lazy = false, -- owns vim.notify and the picker; must be up early
 		config = function()
-			require("configs.plugins.ui.snacks")()
+			require("plugins.configs.ui.snacks")()
 		end,
 	},
 	{
@@ -123,14 +123,14 @@ return {
 		dependencies = { "nvim-tree/nvim-web-devicons" },
 		event = "VeryLazy",
 		config = function()
-			require("configs.plugins.ui.lualine")()
+			require("plugins.configs.ui.lualine")()
 		end,
 	},
 	{
 		"luukvbaal/statuscol.nvim",
 		event = { "BufReadPost", "BufNewFile" },
 		config = function()
-			require("configs.plugins.ui.statuscol")()
+			require("plugins.configs.ui.statuscol")()
 		end,
 	},
 	{
@@ -138,7 +138,7 @@ return {
 		main = "ibl",
 		event = { "BufReadPost", "BufNewFile" },
 		config = function()
-			require("configs.plugins.ui.indent_blankline")()
+			require("plugins.configs.ui.indent_blankline")()
 		end,
 	},
 	{
@@ -157,7 +157,7 @@ return {
 		dependencies = { "kevinhwang91/promise-async" },
 		event = { "BufReadPost", "BufNewFile" },
 		config = function()
-			require("configs.plugins.ui.ufo")()
+			require("plugins.configs.ui.ufo")()
 		end,
 	},
 	{
@@ -165,7 +165,7 @@ return {
 		dependencies = { "nvim-treesitter/nvim-treesitter", "nvim-mini/mini.nvim" },
 		ft = { "markdown", "quarto" },
 		config = function()
-			require("configs.plugins.ui.render_markdown")()
+			require("plugins.configs.ui.render_markdown")()
 		end,
 	},
 	{
@@ -219,7 +219,7 @@ return {
 			"theHamsta/nvim-dap-virtual-text",
 		},
 		config = function()
-			require("configs.plugins.tools.dap.init")()
+			require("plugins.configs.tools.dap.init")()
 		end,
 	},
 
@@ -230,7 +230,7 @@ return {
 		"3rd/image.nvim",
 		ft = { "markdown", "quarto", "python", "ipynb" },
 		config = function()
-			require("configs.plugins.tools.image")()
+			require("plugins.configs.tools.image")()
 		end,
 	},
 	{
@@ -245,7 +245,7 @@ return {
 		ft = { "python", "ipynb" },
 		dependencies = { "rcarriga/nvim-notify" },
 		config = function()
-			require("configs.plugins.tools.jupynium")()
+			require("plugins.configs.tools.jupynium")()
 		end,
 	},
 }

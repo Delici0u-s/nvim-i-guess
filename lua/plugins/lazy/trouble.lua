@@ -1,3 +1,4 @@
+-- example that more files are possible, not just the general. I have only been too lazy to divide into more files
 return {
 	{
 		"folke/trouble.nvim",
