@@ -2,7 +2,7 @@ return function()
 	local ls = require("luasnip")
 
 	-- Load the snippet definitions in editor/snippets/.
-	require("configs.plugins.editor.snippets")
+	require("plugins.configs.editor.snippets")
 
 	-- <Tab> only steals the key when a snippet is actually active; otherwise it
 	-- falls through so nvim-cmp and normal indentation still work.
@@ -28,7 +28,11 @@ return function()
 		group = vim.api.nvim_create_augroup("luasnip_unlink", { clear = true }),
 		pattern = { "s:n", "i:*" },
 		callback = function()
-			if ls.session and ls.session.current_nodes[vim.api.nvim_get_current_buf()] and not ls.session.jump_active then
+			if
+				ls.session
+				and ls.session.current_nodes[vim.api.nvim_get_current_buf()]
+				and not ls.session.jump_active
+			then
 				ls.unlink_current()
 			end
 		end,

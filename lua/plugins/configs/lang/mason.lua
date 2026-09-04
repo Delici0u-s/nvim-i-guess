@@ -2,6 +2,8 @@ return function()
 	local util = require("lspconfig.util") -- util functions are still useful
 	local mason_lsp = require("mason-lspconfig")
 
+	local zls_sync = require("configs.lsp.zls_sync")
+
 	-- -- map .mlx -> matlab
 	-- if vim.filetype and vim.filetype.add then
 	-- 	vim.filetype.add({
@@ -66,6 +68,10 @@ return function()
 
 	vim.lsp.config("zls", {
 		filetypes = { "zig", "zir" },
+		cmd = (function()
+			local path = zls_sync.get_zls_path()
+			return path and { path } or nil -- nil -> lspconfig default (PATH/mason's zls)
+		end)(),
 		settings = {
 			zls = {
 				enable_inlay_hints = true,
@@ -73,6 +79,15 @@ return function()
 			},
 		},
 	})
+	-- vim.lsp.config("zls", {
+	-- 	filetypes = { "zig", "zir" },
+	-- 	settings = {
+	-- 		zls = {
+	-- 			enable_inlay_hints = true,
+	-- 			enable_snippets = true,
+	-- 		},
+	-- 	},
+	-- })
 
 	-- add to your init.lua or a filetype.lua
 	-- vim.filetype.add({
