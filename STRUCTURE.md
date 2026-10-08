@@ -26,11 +26,11 @@ lua/
 │       ├── init.lua          requires lazy.lua
 │       ├── lazy.lua          lazy.nvim bootstrap
 │       ├── ui/               lualine statuscol indent_blankline
-│       │                     snacks ufo render_markdown
+│       │                     snacks snacks_image ufo render_markdown
 │       ├── editor/           cmp luasnip conform lsp_signature
 │       │   └── snippets/     LuaSnip definitions
 │       ├── lang/             mason mason_tools treesitter lazydev
-│       └── tools/            image jupynium dap/
+│       └── tools/            jupynium dap/
 ├── plugins/                  lazy.nvim SPECS (not configs)
 │   ├── general.lua
 │   └── trouble.lua
@@ -38,6 +38,12 @@ lua/
     ├── keybinds.lua          map() wrapper
     ├── terminal.lua          terminal toggle state machine
     └── log.lua               debug logger
+after/
+├── ftplugin/markdown.lua     soft wrap for markdown
+└── queries/markdown_inline/  extra conceals (link titles, escapes)
+queries/html/images.scm       snacks.image <img> override (see file header)
+test/
+└── markdown/                 render test: markdown_view_test.md + assets
 ```
 
 ## Load order

@@ -57,6 +57,22 @@
 - Docker — for `dockerls`
 - Terraform — for `terraformls`
 
+## Optional (Markdown rendering)
+Headings/tables/callouts come from render-markdown.nvim (no deps). Inline
+images, LaTeX and diagrams come from snacks.image and need a terminal with
+the kitty graphics protocol (Ghostty, kitty).
+- ImageMagick (`magick`) — converts every non-PNG image (jpg, webp, gif, svg, …)
+- Ghostscript (`gs`) — PDF images
+- `tectonic` (or `pdflatex`) — LaTeX math (`$…$`, `$$…$$`) rendered as images.
+  No Fedora package: grab the musl binary from the tectonic GitHub releases
+  into `~/.local/bin`
+- `mmdc` — Mermaid diagrams in ```` ```mermaid ```` blocks.
+  `npm i -g --prefix ~/.local @mermaid-js/mermaid-cli` (no sudo; pulls its own Chromium)
+- treesitter parsers `latex` and `html` (in `ensure_installed`; `latex` is
+  built from grammar, so it needs tree-sitter-cli)
+
+Test file: `test/markdown/markdown_view_test.md` (assets in `test/markdown/markdown_test_assets/`).
+
 ## Things to remember
 - Jupiter Notebook
     - `:JupyniumStartAndAttachToServer`

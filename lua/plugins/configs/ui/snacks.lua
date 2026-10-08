@@ -30,11 +30,32 @@ return function()
 				},
 			},
 		},
-		image = { enabled = false }, -- explicitly off: image.nvim owns the
-		-- Kitty graphics protocol session for
-		-- Molten; two plugins fighting over the
-		-- same terminal escape sequences causes
-		-- garbled/duplicate image output
+		-- Inline images + LaTeX math in markdown via the kitty graphics protocol
+		-- (Ghostty). Replaces image.nvim; don't run both, they fight over the
+		-- same terminal escape sequences. Math needs `tectonic` or `pdflatex`.
+		image = {
+			enabled = true,
+			doc = {
+				inline = true,
+				max_width = 80,
+				max_height = 20,
+				-- Hide the source (![alt](src), $math$, ```mermaid blocks) once
+				-- the image is drawn; it reappears while the cursor is inside it.
+				conceal = function(_, type)
+					return type == "math" or type == "image" or type == "chart"
+				end,
+			},
+			convert = {
+				-- Surface converter failures (missing mmdc/tectonic, bad LaTeX)
+				-- instead of silently drawing nothing.
+				notify = true,
+				magick = {
+					-- `-background none` before reading keeps SVG transparency
+					-- (otherwise ImageMagick rasterizes onto white).
+					vector = { "-background", "none", "-density", 192, "{src}[{page}]" },
+				},
+			},
+		},
 		indent = { enabled = false },
 		input = { enabled = true },
 		notifier = { enabled = true },
@@ -43,6 +64,7 @@ return function()
 		statuscolumn = { enabled = false },
 		words = { enabled = true },
 	})
+	require("plugins.configs.ui.snacks_image").setup() -- toggle + live preview hooks
 	local kb = require("utils.keybinds")
 	-- Pickers (<C-t> prefix). Telescope was removed; snacks.picker covers these.
 	kb.map("n", "<C-t>f", function()

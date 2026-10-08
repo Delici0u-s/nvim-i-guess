@@ -17,6 +17,8 @@ return function()
 			"matlab",
 			"markdown",
 			"markdown_inline",
+			"latex", -- snacks.image math in markdown (needs tree-sitter CLI to build)
+			"html", -- snacks.image <img> in markdown
 			"bash",
 			"vim",
 			"vimdoc",

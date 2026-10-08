@@ -224,15 +224,8 @@ return {
 	},
 
 	-- ===========================================================================
-	-- JUPYTER / IMAGES
+	-- JUPYTER (inline images: snacks.image, see configs/ui/snacks.lua)
 	-- ===========================================================================
-	{
-		"3rd/image.nvim",
-		ft = { "markdown", "quarto", "python", "ipynb" },
-		config = function()
-			require("plugins.configs.tools.image")()
-		end,
-	},
 	{
 		"kiyoon/jupynium.nvim",
 		build = "pip3 install --user .",

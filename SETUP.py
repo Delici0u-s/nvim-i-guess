@@ -27,6 +27,10 @@ OPTIONAL = [
     ("docker", "Docker (dockerls)"),
     ("terraform", "Terraform (terraformls)"),
     ("alacritty", "Alacritty — configured DAP external terminal"),
+    ("magick", "ImageMagick — snacks.image converts non-PNG images"),
+    ("gs", "Ghostscript — snacks.image PDF rendering"),
+    ("tectonic", "tectonic — LaTeX math in markdown (pdflatex also works)"),
+    ("mmdc", "mermaid-cli — Mermaid diagrams in markdown"),
 ]
 
 

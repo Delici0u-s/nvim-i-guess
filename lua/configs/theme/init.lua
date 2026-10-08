@@ -11,6 +11,9 @@ local rainglow = vim.fn.stdpath("config") .. "/lua/configs/theme/themes/rainglow
 
 function M.apply(theme_name)
 	vim.cmd("source " .. rainglow .. theme_name .. ".vim")
+	-- Sourcing runs `highlight clear` but, unlike :colorscheme, fires no
+	-- ColorScheme event, so plugins never re-apply their highlight groups.
+	vim.api.nvim_exec_autocmds("ColorScheme", { pattern = theme_name })
 end
 
 function M.apply_mode(mode)
