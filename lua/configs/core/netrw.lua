@@ -98,9 +98,13 @@ vim.api.nvim_create_autocmd("FileType", {
 		end
 
 		map("gh", M.toggle_hidden, "toggle hidden files")
+		map("<space>gh", M.toggle_hidden, "toggle hidden files")
 		map("gl", M.cycle_liststyle, "cycle list style")
+		map("<space>gl", M.cycle_liststyle, "cycle list style")
 		map("gb", M.toggle_banner, "toggle banner")
+		map("<space>gb", M.toggle_banner, "toggle banner")
 		map("q", "<cmd>bdelete<CR>", "close explorer")
+		map("<space>q", "<cmd>bdelete<CR>", "close explorer")
 
 		vim.bo[ev.buf].buflisted = false
 		vim.bo[ev.buf].bufhidden = "wipe"
