@@ -74,9 +74,12 @@ return function()
 		end)(),
 		settings = {
 			zls = {
-				enable_inlay_hints = true,
+				-- enable_inlay_hints was removed from zls; hints are switched on client-side
+				-- (vim.lsp.inlay_hint.enable in configs/lsp/keymaps.lua).
 				enable_snippets = true,
-				-- enable_build_on_save = true, -- does nothing :(
+				semantic_tokens = "full",
+				highlight_global_var_declarations = true,
+				warn_style = true,
 			},
 		},
 	})

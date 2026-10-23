@@ -57,6 +57,15 @@ vim.api.nvim_create_autocmd("LspAttach", {
 			keymap.map("n", lhs, rhs, { buffer = ev.buf, desc = desc })
 		end
 
+		-- Nvim never turns inlay hints on by itself; servers only send them when asked.
+		local client = vim.lsp.get_client_by_id(ev.data.client_id)
+		if client and client:supports_method("textDocument/inlayHint", ev.buf) then
+			vim.lsp.inlay_hint.enable(true, { bufnr = ev.buf })
+		end
+
+		map("<leader>th", function()
+			vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = ev.buf }), { bufnr = ev.buf })
+		end, "LSP: toggle inlay hints")
 		map("gd", vim.lsp.buf.definition, "LSP: go to definition")
 		map("gD", vim.lsp.buf.declaration, "LSP: go to declaration")
 		map("<leader>f", function()
