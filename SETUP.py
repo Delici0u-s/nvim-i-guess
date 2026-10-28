@@ -8,14 +8,14 @@ import sys
 # external system dependencies that Mason cannot install.
 
 REQUIRED = [
-    ("nvim", "Neovim ≥ 0.9"),
+    ("nvim", "Neovim ≥ 0.11"),
     ("git", "git"),
     ("node", "Node.js (npm) — needed for ts_ls, eslint, html, cssls"),
     ("npm", "npm"),
 ]
 
 RECOMMENDED = [
-    ("gcc", "gcc — C compiler (treesitter parsers, cppdbg)"),
+    ("gcc", "gcc — C compiler (treesitter parsers)"),
     ("python3", "Python ≥ 3.8 (pyright, debugpy)"),
     ("java", "Java JDK 17+ (jdtls)"),
     ("go", "Go (goimports, gofmt)"),
@@ -26,7 +26,6 @@ OPTIONAL = [
     ("zig", "Zig"),
     ("docker", "Docker (dockerls)"),
     ("terraform", "Terraform (terraformls)"),
-    ("alacritty", "Alacritty — configured DAP external terminal"),
     ("magick", "ImageMagick — snacks.image converts non-PNG images"),
     ("gs", "Ghostscript — snacks.image PDF rendering"),
     ("tectonic", "tectonic — LaTeX math in markdown (pdflatex also works)"),

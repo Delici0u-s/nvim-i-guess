@@ -1,57 +1,77 @@
+-- nvim-dap setup. Loaded by the nvim-dap spec on the first debugger key.
+--
+--   settings.lua -- which UI, which adapters, terminal; the knobs live there
+--   keymaps.lua  -- every debugger key (also the spec's lazy `keys`)
+--   launch.lua   -- program picker, argument prompt, Python venv detection
+--   ui/          -- UI backends behind one interface (ui/init.lua)
+--
+-- Launch configurations come from mason-nvim-dap's defaults for each adapter
+-- (improved by launch.lua) and from a project's .vscode/launch.json, which
+-- nvim-dap reads by itself.
+
+-- Sign glyph and the theme group its colour is linked to.
+local signs = {
+	DapBreakpoint = { text = "●", link = "DiagnosticError" },
+	DapBreakpointCondition = { text = "◆", link = "DiagnosticWarn" },
+	DapLogPoint = { text = "◉", link = "DiagnosticInfo" },
+	DapBreakpointRejected = { text = "○", link = "DiagnosticHint" },
+	DapStopped = { text = "▶", link = "DiagnosticOk", linehl = "DapStoppedLine" },
+}
+
+local function set_highlights()
+	for name, sign in pairs(signs) do
+		vim.api.nvim_set_hl(0, name, { link = sign.link, default = true })
+	end
+	vim.api.nvim_set_hl(0, "DapStoppedLine", { link = "Visual", default = true })
+end
+
 return function()
-    local mason_dap = require("mason-nvim-dap")
-    local dap = require("dap")
-    local ui = require("dapui")
-    local dap_virtual_text = require("nvim-dap-virtual-text")
+	local dap = require("dap")
+	local settings = require("plugins.configs.tools.dap.settings")
+	local launch = require("plugins.configs.tools.dap.launch")
 
-    -- Dap Virtual Text
-    dap_virtual_text.setup({})
+	require("nvim-dap-virtual-text").setup({})
 
-    mason_dap.setup({
-        ensure_installed = { "cppdbg", "debugpy", },
-        automatic_installation = true,
-        handlers = {
-            function(config)
-                require("mason-nvim-dap").default_setup(config)
-            end,
-        },
-    })
+	-- Registers an installed adapter and its default configurations. Only
+	-- adapters listed in settings, so an old install left in mason doesn't add
+	-- a second set of configurations for the same filetypes.
+	local function register(config, tweak)
+		if not vim.tbl_contains(settings.adapters, config.name) then
+			return
+		end
+		config.configurations = launch.with_args_variants(vim.tbl_map(function(c)
+			c = launch.improve(c)
+			return tweak and tweak(c) or c
+		end, config.configurations or {}))
+		require("mason-nvim-dap").default_setup(config)
+	end
 
-    -- Configurations
-    dap.defaults.fallback.external_terminal = {
-        command = "alacritty",
-        --   command = "/usr/bin/kitty",
-        --   command = "/usr/bin/xterm",
-        --   command = "/usr/bin/konsole",
-        args = { "-e" },
-        --   command = "/usr/bin/gnome-terminal",
-        --   args = {"--", "bash", "-lc"},
-    }
-    -- Optional: force using external terminal for launches
-    -- dap.defaults.fallback.force_external_terminal = true
+	require("mason-nvim-dap").setup({
+		ensure_installed = settings.adapters,
+		automatic_installation = true,
+		handlers = {
+			register,
+			python = function(config)
+				register(config, function(c)
+					c.pythonPath = launch.python_path
+					return c
+				end)
+			end,
+		},
+	})
 
-    local config = function(file)
-        return require("configs.plugins.tools.dap.configs." .. file)
-    end
-    -- Add this configuration alongside your existing one(s)
-    dap.configurations = {
-        c = config("c"),
-        python = config("python"),
-    }
+	dap.defaults.fallback.external_terminal = settings.external_terminal
 
-    -- Dap UI
+	-- Signs. Rainglow themes run `highlight clear`, which drops these groups,
+	-- so they are re-linked on every colourscheme change.
+	set_highlights()
+	vim.api.nvim_create_autocmd("ColorScheme", {
+		group = vim.api.nvim_create_augroup("dap_highlights", { clear = true }),
+		callback = set_highlights,
+	})
+	for name, sign in pairs(signs) do
+		vim.fn.sign_define(name, { text = sign.text, texthl = name, linehl = sign.linehl, numhl = "" })
+	end
 
-    ui.setup()
-
-    vim.fn.sign_define("DapBreakpoint", { text = "🛑" })
-
-    dap.listeners.before.attach.dapui_config = ui.open
-    dap.listeners.before.launch.dapui_config = ui.open
-    dap.listeners.before.event_terminated.dapui_config = ui.close
-    dap.listeners.before.event_exited.dapui_config = ui.close
-
-    -- Explicit require. The autoloader's debug.getinfo(3) heuristic assumes it
-    -- is called from a module main chunk; from inside this closure the stack is
-    -- one frame deeper and it resolved the directory by accident.
-    require("configs.plugins.tools.dap.keymaps")
+	require("plugins.configs.tools.dap.ui").setup()
 end

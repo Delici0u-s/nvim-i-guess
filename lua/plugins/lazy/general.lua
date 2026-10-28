@@ -144,13 +144,9 @@ return {
 	{
 		"folke/which-key.nvim",
 		event = "VeryLazy",
-		opts = {
-			-- Popup delay is independent of 'timeoutlen'. Keep it long enough
-			-- that which-key never appears during normal fast typing on the
-			-- <C-t>/<C-h>/<C-v>/<C-e> prefixes -- it only shows if you actually
-			-- pause. Set to 0 if you want it to appear immediately instead.
-			delay = 500,
-		},
+		config = function()
+			require("plugins.configs.ui.which_key")()
+		end,
 	},
 	{
 		"kevinhwang91/nvim-ufo",
@@ -167,10 +163,6 @@ return {
 		config = function()
 			require("plugins.configs.ui.render_markdown")()
 		end,
-	},
-	{
-		"stevearc/dressing.nvim",
-		event = "VeryLazy",
 	},
 
 	-- ===========================================================================
@@ -198,29 +190,28 @@ return {
 	-- ===========================================================================
 	{
 		"mfussenegger/nvim-dap",
-		-- Must list every key defined in dap/keymaps.lua: a key not listed here
-		-- does nothing until some other <leader>d key loads the plugin first.
-		keys = {
-			{ "<leader>dt", desc = "DAP: toggle breakpoint" },
-			{ "<leader>dc", desc = "DAP: continue" },
-			{ "<leader>di", desc = "DAP: step into" },
-			{ "<leader>do", desc = "DAP: step over" },
-			{ "<leader>du", desc = "DAP: step out" },
-			{ "<leader>dr", desc = "DAP: open REPL" },
-			{ "<leader>dl", desc = "DAP: run last" },
-			{ "<leader>dq", desc = "DAP: terminate" },
-			{ "<leader>db", desc = "DAP: list breakpoints" },
-			{ "<leader>de", desc = "DAP: exception breakpoints" },
-		},
+		-- dap/keymaps.lua is the only list of debugger keys; lazy both maps them
+		-- and uses them as load triggers, so no key can be missing here.
+		keys = require("plugins.configs.tools.dap.keymaps"),
 		dependencies = {
-			"rcarriga/nvim-dap-ui",
-			"nvim-neotest/nvim-nio",
 			"jay-babu/mason-nvim-dap.nvim",
 			"theHamsta/nvim-dap-virtual-text",
 		},
 		config = function()
-			require("plugins.configs.tools.dap.init")()
+			require("plugins.configs.tools.dap")()
 		end,
+	},
+	-- Debugger UIs. All stay installed so switching is one edit in
+	-- tools/dap/settings.lua; only the selected one is ever required (loaded).
+	{
+		"rcarriga/nvim-dap-ui",
+		lazy = true, -- loaded by require from tools/dap/ui/dap_ui.lua
+		dependencies = { "nvim-neotest/nvim-nio" },
+	},
+	{
+		"igorlfs/nvim-dap-view",
+		version = "1.*",
+		lazy = true, -- loaded by require from tools/dap/ui/dap_view.lua
 	},
 
 	-- ===========================================================================

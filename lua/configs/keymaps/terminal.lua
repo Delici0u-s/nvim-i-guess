@@ -4,12 +4,12 @@ local term = require("utils.terminal")
 
 -- Leave terminal insert mode / close window.
 kb.map("t", "<C-X>", "<C-\\><C-n>", { silent = true, desc = "Terminal: to normal mode" })
-kb.map("n", "<C-X>", ":x<cr>", { silent = true, desc = "Write and close" })
+kb.map("n", "<C-X>", ":x<cr>", { silent = true, desc = "Editor: write and close" })
 
 kb.map({ "n", "t" }, "<C-n>", function()
 	term.toggle("vertical")
-end, { desc = "Toggle terminal (vertical)" })
+end, { desc = "Terminal: toggle (vertical)" })
 
 kb.map({ "n", "t" }, "<C-h>n", function()
 	term.toggle("horizontal")
-end, { desc = "Toggle terminal (horizontal)" })
+end, { desc = "Terminal: toggle (horizontal)" })

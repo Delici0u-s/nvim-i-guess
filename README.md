@@ -13,9 +13,11 @@
 - tree-sitter-cli
 
 ## Debuggers
-- gdb — native C/C++ debugging
-- `cppdbg` — installed automatically via mason-nvim-dap
-- `debugpy` — installed automatically via mason-nvim-dap
+Installed automatically via mason-nvim-dap (list in `lua/plugins/configs/tools/dap/settings.lua`):
+- `codelldb` — C, C++, Rust, Zig
+- `debugpy` — Python
+
+Test programs and a headless check: `test/debug/` (see its README).
 
 ## Language Servers (auto-installed via mason-lspconfig)
 | Server | Language |

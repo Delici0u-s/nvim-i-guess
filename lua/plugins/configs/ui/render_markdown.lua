@@ -162,7 +162,7 @@ return function()
 		rm.toggle()
 		vim.g.markdown_images_off = not vim.g.markdown_images_off
 		images.refresh()
-	end, { silent = true, desc = "Toggle markdown rendering (render-markdown + images)" })
+	end, { silent = true, desc = "Markdown: toggle rendering (render-markdown + images)" })
 
 	-- Live preview: while the cursor is inside an image/math/mermaid source,
 	-- show the rendered result below it instead of hiding it. On by default.
@@ -170,11 +170,11 @@ return function()
 		vim.g.markdown_live_off = not vim.g.markdown_live_off
 		images.refresh()
 		vim.notify("Markdown live preview " .. (vim.g.markdown_live_off and "off" or "on"))
-	end, { silent = true, desc = "Toggle markdown live image preview" })
+	end, { silent = true, desc = "Markdown: toggle live image preview" })
 
 	-- Wide tables break under soft wrap (known render-markdown/neovim limit:
 	-- wrap points are computed before conceal). Flip wrap when reading them.
 	kb.map("n", "<C-R>w", function()
 		vim.wo.wrap = not vim.wo.wrap
-	end, { silent = true, desc = "Toggle line wrap" })
+	end, { silent = true, desc = "Markdown: toggle line wrap" })
 end

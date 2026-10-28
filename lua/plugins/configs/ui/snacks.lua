@@ -18,15 +18,15 @@ return function()
 					hidden = true, -- show dotfiles by default
 					ignored = false, -- but respect .gitignore
 					auto_close = false,
-			  layout = { preset = "sidebar", preview = false },
-			  win = {
-				  list = {
-					  keys = {
-						  ["<C-h>"] = "toggle_hidden",
-						  ["<C-i>"] = "toggle_ignored",
-					  },
-				  },
-			  },
+					layout = { preset = "sidebar", preview = false },
+					win = {
+						list = {
+							keys = {
+								["<C-h>"] = "toggle_hidden",
+								["<C-i>"] = "toggle_ignored",
+							},
+						},
+					},
 				},
 			},
 		},
@@ -85,13 +85,18 @@ return function()
 	kb.map("n", "<C-t>m", function()
 		snacks.picker.man()
 	end, { desc = "Snacks: man pages" })
+	-- Lookup pickers, tweaked in snacks_pickers.lua: search by key/name or by
+	-- description.
+	local pickers = require("plugins.configs.ui.snacks_pickers")
+	kb.map("n", "<C-t>k", pickers.keymaps, { desc = "Snacks: keymaps" })
+	kb.map("n", "<C-t>c", pickers.commands, { desc = "Snacks: commands" })
 	-- Explorer. <C-e> prefix mirrors netrw's <C-e>x.
 	kb.map("n", "<C-e>e", function()
-	snacks.explorer.reveal()
+		snacks.explorer.reveal()
 	end, { desc = "Snacks: explorer (reveal current file)" })
 
 	kb.map("n", "<C-e>E", function()
-	snacks.explorer({ cwd = vim.uv.cwd() })
+		snacks.explorer({ cwd = vim.uv.cwd() })
 	end, { desc = "Snacks: explorer (cwd)" })
 	-- Notifier (drop-in for nvim-notify)
 	vim.notify = snacks.notifier.notify

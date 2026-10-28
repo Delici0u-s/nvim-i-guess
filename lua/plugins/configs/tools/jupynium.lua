@@ -92,7 +92,7 @@ return function()
 
 	kb.map("n", "<space>jj", "<cmd>JupyniumScrollDown<CR>", { silent = true, desc = "Jupynium: scroll down" })
 	kb.map("n", "<space>jk", "<cmd>JupyniumScrollUp<CR>", { silent = true, desc = "Jupynium: scroll up" })
-	kb.map("n", "<space>k", "<cmd>JupyniumKernelHover<CR>", { silent = true, desc = "Jupynium: scroll down" })
+	kb.map("n", "<space>k", "<cmd>JupyniumKernelHover<CR>", { silent = true, desc = "Jupynium: kernel hover" })
 
 	-- Tab Navigation (<space>jl1 .. <space>jl9)
 	for i = 1, 9 do

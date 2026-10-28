@@ -12,7 +12,21 @@ return function()
 			lualine_a = { "mode" },
 			lualine_b = { "branch", "diff", "diagnostics" },
 			lualine_c = { { "filename", path = 1 } },
-			lualine_x = { "encoding", "fileformat", "filetype" },
+			lualine_x = {
+				{
+					-- Debug session state ("Stopped at breakpoint", ...). Never
+					-- requires nvim-dap itself, so it can't trigger loading it.
+					function()
+						return " " .. require("dap").status()
+					end,
+					cond = function()
+						return package.loaded.dap ~= nil and require("dap").session() ~= nil
+					end,
+				},
+				"encoding",
+				"fileformat",
+				"filetype",
+			},
 			lualine_y = { "progress" },
 			lualine_z = { "location" },
 		},
