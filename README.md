@@ -1,9 +1,7 @@
 # Requirements
 
-> Structure: `init.lua` → `lua/configs/` (core → theme → lsp → keymaps → plugins).
-> Plugin *specs* live in `lua/plugins/`; plugin *configs* live in
-> `lua/configs/plugins/{ui,editor,lang,tools}/` and load only via their spec.
-> See `STRUCTURE.md` for the full tree and the two rules that govern it.
+> How the config is built, where everything lives and how to extend it:
+> see `overview.md`. This file lists requirements only.
 
 
 ## Core
@@ -48,7 +46,7 @@ Test programs and a headless check: `test/debug/` (see its README).
 
 # Recommended
 
-- C compiler (`gcc` or `clang`) — required for `clangd`, `cppdbg`, treesitter parsers
+- C compiler (`gcc` or `clang`) — required for `clangd`, treesitter parsers
 - Python ≥ 3.8 — required for `pyright`, `debugpy`
 - Java JDK 17+ — required for `jdtls`
 - Go — required for `goimports` / `gofmt`

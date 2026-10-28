@@ -4,7 +4,7 @@
 -- is GLOBAL, not buffer-local. Toggling mutates every netrw buffer at once,
 -- and open buffers do not redraw on their own -- hence refresh() below.
 --
--- The primary explorer is snacks (configs/plugins/ui/snacks.lua, <C-e>e).
+-- The primary explorer is snacks (plugins/configs/ui/snacks.lua, <C-e>e).
 -- netrw is kept for :Ex/:Hex/:Vex splits and scp:// remote browsing, which
 -- snacks.explorer does not handle.
 

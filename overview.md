@@ -119,7 +119,6 @@ test/debug/                      debugger test programs, build.sh, headless run.
 test/keymaps/run.lua             headless check: every mapping has an "Area: action" desc
 SETUP.py                         checks system prerequisites mason cannot install
 README.md                        requirements, plus "things to remember"
-STRUCTURE.md                     older, shorter structure doc (paths partly outdated)
 lazy-lock.json                   pinned plugin commits
 package.json                     tree-sitter-cli (needed to build the latex parser)
 ```
@@ -731,8 +730,7 @@ nvim --headless -c 'lua require("lazy").load({ plugins = { "<name>" } })' -c 'qa
 - [x] Debugging: fixed the broken require paths; codelldb + debugpy; program picker; venv
   detection; UI choice; F-keys + `<leader>d` set; theme-aware signs; lualine status;
   `test/debug/`.
-- [ ] `cpptools` is still installed in mason but unused (`:MasonUninstall cpptools` frees it).
+- [x] Cleanup: `STRUCTURE.md` folded into this file, stale paths in comments fixed, unused
+  `cpptools` and dressing.nvim removed.
 - [ ] Optional: persistent breakpoints across restarts; build before launch (e.g. `zig build`).
-- [ ] `STRUCTURE.md` describes old paths (`configs/plugins/`, `plugins/*.lua`). Merge it into this
-  file or delete it.
 - [ ] `test/keymaps/run.lua` doesn't cover buffer-local maps (LSP, netrw).

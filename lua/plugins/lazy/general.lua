@@ -5,7 +5,7 @@ return {
 	{
 		"nvim-treesitter/nvim-treesitter",
 		lazy = false, -- highlighting must exist for the first buffer drawn
-		branch = "master", -- cf_tree_sitter.lua uses master-only API
+		branch = "master", -- lang/treesitter.lua uses master-only API
 		build = ":TSUpdate",
 		config = function()
 			require("plugins.configs.lang.treesitter")()
@@ -16,7 +16,7 @@ return {
 	-- LSP / MASON
 	-- ===========================================================================
 	{
-		-- Not lazy: configs/general/lsp_capabilities.lua requires this at startup
+		-- Not lazy: configs/lsp/capabilities.lua requires this at startup
 		-- to build the global capabilities table before any server is enabled.
 		-- It is a small module that returns a table; there is no real cost.
 		"hrsh7th/cmp-nvim-lsp",

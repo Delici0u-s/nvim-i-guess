@@ -15,7 +15,7 @@ return function()
 	})
 
 	-- foldingRange capability is advertised in
-	-- configs/general/lsp_capabilities.lua, before any server starts. Declaring
+	-- configs/lsp/capabilities.lua, before any server starts. Declaring
 	-- it here (on VeryLazy) was too late -- servers had already attached
 	-- without it, so the "lsp" fold provider always fell back to treesitter.
 

@@ -1,7 +1,7 @@
 return function()
 	-- NOTE: this is nvim-treesitter `master` branch API. The `main` branch
 	-- removed nvim-treesitter.configs entirely; do not bump the branch in
-	-- lua/plugins/general.lua without rewriting this file.
+	-- lua/plugins/lazy/general.lua without rewriting this file.
 	require("nvim-treesitter.configs").setup({
 		ensure_installed = {
 			"c",

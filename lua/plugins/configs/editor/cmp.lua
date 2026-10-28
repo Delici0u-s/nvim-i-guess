@@ -13,7 +13,7 @@ function M.setup()
 		return
 	end
 
-	-- LSP capabilities are advertised in configs/general/lsp_capabilities.lua,
+	-- LSP capabilities are advertised in configs/lsp/capabilities.lua,
 	-- which runs before any server starts. Setting them here (on InsertEnter)
 	-- was too late for servers that had already attached.
 
@@ -105,7 +105,7 @@ end
 --
 -- vim.keymap.set("i", "<C-M>", debug_lsp_completion, { buffer = true })
 
--- keep same shape as your plugin config expects: require("configs.plugins.editor.cmp")()
+-- Called from the nvim-cmp spec: require("plugins.configs.editor.cmp")()
 return function()
 	M.setup()
 end
