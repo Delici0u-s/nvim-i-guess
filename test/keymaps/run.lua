@@ -64,4 +64,40 @@ for _, plugin in ipairs(require("lazy").plugins()) do
 	end
 end
 
+-- Keymap picker (<C-t>k): built-in keys from the help index ----------------
+local pickers = require("plugins.configs.ui.snacks_pickers")
+local index = pickers.help_index()
+local modes = {}
+for _, key in ipairs(index.keys) do
+	modes[key.mode] = (modes[key.mode] or 0) + 1
+	if key.desc == "" or key.lhs:find("%s") then
+		failures[#failures + 1] = ("help index: bad entry |%s| %q = %q"):format(key.tag, key.lhs, key.desc)
+	end
+end
+print("built-in keys per mode: " .. vim.inspect(modes):gsub("%s+", " "))
+for _, mode in ipairs({ "n", "i", "v", "o", "c" }) do
+	if not modes[mode] then
+		failures[#failures + 1] = "help index: no built-in keys parsed for mode " .. mode
+	end
+end
+
+local picker = pickers.keymaps()
+vim.wait(5000, function()
+	return #picker:items() > 0 and not picker:is_active()
+end, 20)
+local builtin = vim.iter(picker:items()):find(function(i)
+	return i.builtin
+end)
+if not builtin then
+	failures[#failures + 1] = "keymap picker: no built-in keys listed"
+else
+	picker.opts.confirm(picker, builtin)
+	vim.wait(1000, function()
+		return vim.bo.buftype == "help"
+	end, 20)
+	if vim.bo.buftype ~= "help" then
+		failures[#failures + 1] = "keymap picker: <CR> on a built-in key didn't open its help"
+	end
+end
+
 finish()

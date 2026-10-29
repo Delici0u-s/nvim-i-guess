@@ -257,15 +257,18 @@ Leader is **Space**. Local leader is `\`.
 
 | Key | Shows |
 |---|---|
-| `<C-t>k` | fuzzy search over **every** mapping by key or description. `<CR>` runs the key, `<A-g>` jumps to where it is defined |
+| `<C-t>k` | fuzzy search over **every** mapping *and every built-in key* (`dd`, `ciw`, `<C-w>v`, …, tagged `builtin`) by key or description. `<CR>` runs a mapping or opens the help for a built-in. `<A-g>` jumps to where a mapping is defined (or the help). `<A-b>` hides/shows built-ins |
 | `<C-t>c` | fuzzy search over commands by name or description (your `desc`, a Vimscript command's definition, or for built-ins the summary from `:help ex-cmd-index`) |
 | `<leader>?` | which-key popup of the current buffer's own maps (LSP, netrw, …) |
 | pause on any prefix | which-key popup of what can follow (after 500 ms) |
 | `:verbose map <key>` | where a key was last defined |
 
 Both pickers are tweaked in `plugins/configs/ui/snacks_pickers.lua`. Keymap rows are
-`mode key description` (plus the rhs when it's a string, not a Lua function), so the description
-stays visible next to the preview. `:verbose map` shows the real file and line even for maps made
+`mode key [tag] description` (plus the rhs when it's a string, not a Lua function), so the
+description stays visible next to the preview. Built-in keys and Ex command summaries come from
+Neovim's `doc/index.txt` (`:help index`), parsed once on first use (`help_index()`). A built-in
+that a mapping changes (yours, a plugin's or a Neovim default like `Y`) is marked **(remapped)**.
+The mapping's own row is in the same list. `:verbose map` shows the real file and line even for maps made
 through `utils/keybinds.lua`, because its calls are tail calls (see [Utilities](#utilities)).
 
 ### Prefixes
@@ -711,7 +714,7 @@ Full list with install hints: `README.md`. `python3 SETUP.py` checks which are p
 |---|---|---|
 | Markdown rendering | open `test/markdown/markdown_view_test.md` | every rendering feature, by eye (assets include spaces in paths, wide images) |
 | Debugger | `test/debug/build.sh`, then `nvim --headless -c "luafile test/debug/run.lua"` | config loads, adapters registered, keys mapped, real session per language stops on the `BREAK` line, UI actions work. `DAP_TEST_UI=…`, `DAP_TEST_ONLY=…` |
-| Keymap descriptions | `nvim --headless --cmd "set verbose=1" -c "luafile test/keymaps/run.lua"` | every global map and lazy key from this config has an `"Area: action"` desc |
+| Keymaps | `nvim --headless --cmd "set verbose=1" -c "luafile test/keymaps/run.lua"` | every global map and lazy key from this config has an `"Area: action"` desc; built-in keys parse for every mode and `<CR>` on one opens its help |
 
 Both headless tests exit non-zero on failure. Smoke check that any lazy plugin's config runs:
 
