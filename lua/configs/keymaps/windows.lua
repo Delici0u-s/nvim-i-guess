@@ -12,6 +12,11 @@ kb.map({ "n", "t" }, "<A-q>", function()
 	vim.cmd((vim.v.count > 0 and vim.v.count or "") .. "wincmd W")
 end, { desc = "Window: previous" })
 
+-- <C-q> closes the window (:quit; 'confirm' asks about unsaved changes),
+-- next to <C-x> (write and close). It replaces the built-in <C-q> (instant
+-- Visual block), which moved to <A-v> in editor.lua.
+kb.map("n", "<C-q>", "<cmd>quit<CR>", { desc = "Window: close" })
+
 kb.map("n", "<C-h>x", "<cmd>Hex<CR>", { desc = "netrw: explore (hsplit)", silent = true })
 kb.map("n", "<C-v>x", "<cmd>Vex<CR>", { desc = "netrw: explore (vsplit)", silent = true })
 kb.map("n", "<C-e>x", "<cmd>Ex<CR>", { desc = "netrw: explore", silent = true })

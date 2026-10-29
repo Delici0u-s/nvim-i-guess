@@ -299,6 +299,8 @@ Single keys and others:
 | `<C-S>` | save (normal and insert) | `keymaps/editor.lua` |
 | `<C-a>{reg}` | run macro from register | `keymaps/editor.lua` |
 | `<A-w>` / `<A-q>` | next / previous window (`<C-w>w` / `<C-w>W` in one chord; also from a terminal; a count jumps to window N) | `keymaps/windows.lua` |
+| `<C-q>` | close window (`:quit`, asks if unsaved). Replaces the built-in `<C-q>` = instant Visual block | `keymaps/windows.lua` |
+| `<A-v>` | Visual block, instantly (bare `<C-v>` waits `timeoutlen` because `<C-v>x` exists) | `keymaps/editor.lua` |
 | `<C-n>` | toggle vertical terminal | `keymaps/terminal.lua` |
 | `<C-X>` | terminal → normal mode / `:x` in normal mode | `keymaps/terminal.lua` |
 | `gd` / `gD` | LSP definition / declaration | `lsp/keymaps.lua` |

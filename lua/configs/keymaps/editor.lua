@@ -18,6 +18,11 @@ kb.map("i", "<C-S>", function()
 	vim.api.nvim_feedkeys("i", "n", true)
 end, { silent = true, desc = "Editor: save (stay in insert)" })
 
+-- Visual block without a wait. <C-v> is a mapping prefix here (<C-v>x), so the
+-- bare <C-v> only starts Visual block after 'timeoutlen'; the built-in instant
+-- alternative <C-q> closes windows instead (windows.lua).
+kb.map("n", "<A-v>", "<C-v>", { desc = "Editor: Visual block mode" })
+
 -- <C-a> then a register letter runs that macro, without needing @.
 kb.map("n", "<C-a>", function()
 	vim.api.nvim_echo({ { "Press macro register:", "Normal" } }, false, {})
