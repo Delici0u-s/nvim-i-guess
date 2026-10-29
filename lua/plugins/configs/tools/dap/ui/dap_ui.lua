@@ -31,8 +31,30 @@ function M.setup()
 
 	dap.listeners.before.attach.dap_ui = dapui().open
 	dap.listeners.before.launch.dap_ui = dapui().open
-	dap.listeners.before.event_terminated.dap_ui = dapui().close
-	dap.listeners.before.event_exited.dap_ui = dapui().close
+	-- Close when the last session is gone, however it ended. The terminated /
+	-- exited events dap-ui's README hooks aren't always sent: codelldb answers
+	-- <leader>dq (terminate) with a bare disconnect, so the UI stayed open.
+	dap.listeners.on_session.dap_ui = function(_, new)
+		if new == nil then
+			M.close()
+		end
+	end
+end
+
+--- Close the UI. If the cursor is in one of its windows, move it to a code
+--- window first, so it doesn't end up in whatever window happens to be left.
+function M.close()
+	local ft = vim.bo.filetype
+	if ft:find("^dapui_") or ft == "dap-repl" then
+		for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+			local buf = vim.api.nvim_win_get_buf(win)
+			if vim.bo[buf].buftype == "" and not vim.bo[buf].filetype:find("^dapui_") then
+				vim.api.nvim_set_current_win(win)
+				break
+			end
+		end
+	end
+	dapui().close()
 end
 
 function M.toggle()

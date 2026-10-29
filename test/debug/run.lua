@@ -144,6 +144,15 @@ end
 
 local timeout = tonumber(os.getenv("DAP_TEST_TIMEOUT_MS")) or 20000
 
+-- A window belonging to a debugger UI (dap-ui, dap-view, nvim-dap's REPL/terminal).
+local function is_debug_window(win)
+	local buf = vim.api.nvim_win_get_buf(win)
+	local ft = vim.bo[buf].filetype
+	return ft:find("^dapui_") ~= nil
+		or ft:find("^dap%-") ~= nil
+		or vim.api.nvim_buf_get_name(buf):find("%[dap%-terminal%]") ~= nil
+end
+
 local only = os.getenv("DAP_TEST_ONLY") -- e.g. DAP_TEST_ONLY=python
 
 for _, p in ipairs(programs) do
@@ -226,11 +235,40 @@ for _, p in ipairs(programs) do
 			end
 			local ok, err = pcall(ui.watch, "1 + 1")
 			check(ok, p.ft .. ": ui.watch() while stopped", tostring(err))
-			dap.terminate()
+			-- Quit the way a user does: <leader>dq, with the cursor inside a
+			-- debugger window if the UI has one open (that used to leave the
+			-- UI open).
+			local in_ui = false
+			for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+				if is_debug_window(win) then
+					vim.api.nvim_set_current_win(win)
+					in_ui = true
+					break
+				end
+			end
+			vim.cmd("stopinsert")
+			vim.api.nvim_feedkeys(vim.keycode("<leader>dq"), "xt", false)
 			vim.wait(timeout, function()
 				return ended and dap.session() == nil
 			end, 50)
-			check(dap.session() == nil, p.ft .. ": session ends on terminate")
+			check(dap.session() == nil, p.ft .. ": <leader>dq ends the session")
+			local left = {}
+			vim.wait(2000, function()
+				left = vim.tbl_filter(is_debug_window, vim.api.nvim_tabpage_list_wins(0))
+				return #left == 0
+			end, 50)
+			check(
+				#left == 0,
+				("%s: debugger windows close on quit%s"):format(p.ft, in_ui and " (cursor was in one)" or ""),
+				#left
+					.. " left: "
+					.. table.concat(
+						vim.tbl_map(function(w)
+							return vim.bo[vim.api.nvim_win_get_buf(w)].filetype
+						end, left),
+						", "
+					)
+			)
 		end
 	end
 	::continue::

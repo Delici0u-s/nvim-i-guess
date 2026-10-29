@@ -628,6 +628,11 @@ flowchart TD
 | `"widgets"` | nothing until asked: floats for scopes/stack, hover for eval, sidebar on `<leader>dU` | no plugin; no watches |
 
   A backend can leave an action out; `ui/init.lua` then falls back to the widgets implementation.
+- **Closing:** dap-ui closes when the last session ends (`dap.listeners.on_session`), not on the
+  `terminated`/`exited` events: codelldb answers `<leader>dq` with a bare disconnect, so those
+  events don't always arrive. If the cursor was in a dap-ui window, it moves to a code window
+  first. For every UI, `ui/init.lua` then closes leftover debugger floats (hover, scopes, stack)
+  and the program's output terminal window (the buffer is kept).
 - **Signs:** `●` breakpoint, `◆` conditional, `◉` logpoint, `○` rejected, `▶` stopped (the line is
   highlighted). Colours link to the theme's `Diagnostic*` groups and are re-linked on `ColorScheme`
   (rainglow runs `highlight clear`).

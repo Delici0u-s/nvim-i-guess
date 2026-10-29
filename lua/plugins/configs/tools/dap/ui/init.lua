@@ -52,7 +52,34 @@ function M.expression()
 	return vim.fn.expand("<cexpr>")
 end
 
-M.setup = action("setup")
+--- Windows nvim-dap (or a UI) opened that the UI doesn't close itself:
+--- floats (hover, scopes, frames) and the program's output terminal.
+local function leftover(win)
+	local buf = vim.api.nvim_win_get_buf(win)
+	local floating = vim.api.nvim_win_get_config(win).relative ~= ""
+	return (floating and vim.bo[buf].filetype:find("^dap") ~= nil)
+		or vim.api.nvim_buf_get_name(buf):find("%[dap%-terminal%]") ~= nil
+end
+
+local setup_backend = action("setup")
+
+function M.setup()
+	setup_backend()
+	-- When the last session ends, close the leftovers. Scheduled so the UI
+	-- closes its own windows first; the terminal buffer itself is kept.
+	require("dap").listeners.on_session.dap_leftovers = function(_, new)
+		if new ~= nil then
+			return
+		end
+		vim.schedule(function()
+			for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+				if leftover(win) then
+					pcall(vim.api.nvim_win_close, win, false)
+				end
+			end
+		end)
+	end
+end
 M.toggle = action("toggle")
 M.eval = action("eval")
 M.watch = action("watch")
