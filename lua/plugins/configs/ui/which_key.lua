@@ -12,6 +12,7 @@ return function()
 		-- pause. Set to 0 if you want it to appear immediately instead.
 		delay = 500,
 		spec = {
+			{ "<leader>a", group = "AI / Claude Code", mode = { "n", "v" } },
 			{ "<leader>d", group = "Debug", mode = { "n", "v" } },
 			{ "<leader>t", group = "Tabs / toggles" },
 			{ "<leader>tt", group = "Trouble" },
