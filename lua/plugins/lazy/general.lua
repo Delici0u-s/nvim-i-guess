@@ -232,4 +232,6 @@ return {
 			require("plugins.configs.tools.jupynium")()
 		end,
 	},
+
+	-- { "glacambre/firenvim", build = ":call firenvim#install(0)" },
 }
