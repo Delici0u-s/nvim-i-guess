@@ -298,6 +298,7 @@ Single keys and others:
 | `<C-l>` | toggle search highlight | `keymaps/editor.lua` |
 | `<C-S>` | save (normal and insert) | `keymaps/editor.lua` |
 | `<C-a>{reg}` | run macro from register | `keymaps/editor.lua` |
+| `<A-w>` / `<A-q>` | next / previous window (`<C-w>w` / `<C-w>W` in one chord; also from a terminal; a count jumps to window N) | `keymaps/windows.lua` |
 | `<C-n>` | toggle vertical terminal | `keymaps/terminal.lua` |
 | `<C-X>` | terminal → normal mode / `:x` in normal mode | `keymaps/terminal.lua` |
 | `gd` / `gD` | LSP definition / declaration | `lsp/keymaps.lua` |

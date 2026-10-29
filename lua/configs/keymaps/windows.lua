@@ -1,5 +1,16 @@
--- netrw explorer and tab management.
+-- Window cycling, netrw explorer and tab management.
 local kb = require("utils.keybinds")
+
+-- Cycle windows in one chord: <A-w> = <C-w>w, <A-q> = <C-w>W (q is left of w,
+-- so "back"). <C-w>W needs Shift inside a two-key sequence, which is slow for
+-- stepping back repeatedly. <cmd> keeps them working from a terminal split
+-- without leaving terminal mode first. A count jumps to window N, like <C-w>w.
+kb.map({ "n", "t" }, "<A-w>", function()
+	vim.cmd((vim.v.count > 0 and vim.v.count or "") .. "wincmd w")
+end, { desc = "Window: next" })
+kb.map({ "n", "t" }, "<A-q>", function()
+	vim.cmd((vim.v.count > 0 and vim.v.count or "") .. "wincmd W")
+end, { desc = "Window: previous" })
 
 kb.map("n", "<C-h>x", "<cmd>Hex<CR>", { desc = "netrw: explore (hsplit)", silent = true })
 kb.map("n", "<C-v>x", "<cmd>Vex<CR>", { desc = "netrw: explore (vsplit)", silent = true })
