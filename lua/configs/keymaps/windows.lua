@@ -17,42 +17,66 @@ end, { desc = "Window: previous" })
 --
 -- When closing would lose changes, Neovim's 'confirm' dialog only takes its own
 -- letters, so this asks instead: a second <C-q> closes without saving.
-local function close_window()
-	local confirm = vim.o.confirm
-	vim.o.confirm = false -- fail with an error instead of showing the dialog
-	local ok, err = pcall(vim.cmd.quit)
-	vim.o.confirm = confirm
-	if ok then
-		return
+
+--- File buffers whose changes closing this window would lose (empty: none).
+--- Decided up front: letting :quit fail and catching it still makes Neovim
+--- show "Press ENTER", which hid the question.
+local function would_lose()
+	if vim.fn.winnr("$") == 1 and vim.fn.tabpagenr("$") == 1 then
+		-- Last window: closing exits Neovim, so every modified file counts.
+		return vim.tbl_filter(function(info)
+			local bt = vim.bo[info.bufnr].buftype
+			return bt == "" or bt == "acwrite"
+		end, vim.fn.getbufinfo({ bufmodified = 1 }))
 	end
-	-- One line that fits v:echospace (the width left next to ruler/showcmd):
-	-- anything taller or wider makes Neovim show "Press ENTER", which hides the
-	-- choices. Longest variant that fits wins; the last one is cut to fit.
-	local reason = (tostring(err):match("E%d+: (.*)") or tostring(err)):gsub("%s*%(add ! to override%)", "")
+	-- Otherwise the buffer is only hidden, unless it can't be.
+	local buf = vim.api.nvim_get_current_buf()
+	local hides = vim.o.hidden or vim.bo.bufhidden == "hide"
+	if vim.bo.modified and not hides and #vim.fn.win_findbuf(buf) == 1 then
+		return vim.fn.getbufinfo(buf)
+	end
+	return {}
+end
+
+--- One line that fits v:echospace (the width left next to ruler/showcmd):
+--- anything taller or wider also triggers "Press ENTER". The longest variant
+--- that fits wins; the last one is cut to fit as a last resort.
+local function question(lost)
+	local what = #lost == 1
+			and ((lost[1].name ~= "" and vim.fn.fnamemodify(lost[1].name, ":t") or "[No Name]") .. " has unsaved changes")
+		or (#lost .. " files have unsaved changes")
 	local options = {
 		"<C-q> again: close without saving · y: save and close · other key: cancel",
 		"<C-q>: discard · y: save · other: cancel",
 	}
-	local line
 	for _, opt in ipairs(options) do
-		for _, text in ipairs({ reason .. " · " .. opt, opt }) do
-			if not line and vim.fn.strdisplaywidth(text) <= vim.v.echospace then
-				line = text
+		for _, text in ipairs({ what .. " · " .. opt, opt }) do
+			if vim.fn.strdisplaywidth(text) <= vim.v.echospace then
+				return text
 			end
 		end
 	end
-	line = line or vim.fn.strcharpart(options[#options], 0, vim.v.echospace)
-	vim.api.nvim_echo({ { line, "Question" } }, false, {})
+	return vim.fn.strcharpart(options[#options], 0, vim.v.echospace)
+end
+
+local function close_window()
+	local lost = would_lose()
+	if #lost == 0 then
+		return vim.cmd.quit()
+	end
+	vim.api.nvim_echo({ { question(lost), "Question" } }, false, {})
 	local key = vim.fn.getcharstr()
-	vim.cmd.redraw()
 	vim.api.nvim_echo({ { "" } }, false, {})
+	local last = vim.fn.winnr("$") == 1 and vim.fn.tabpagenr("$") == 1
+	local ok, err = true, nil
 	if key == vim.keycode("<C-q>") or key == "n" then
-		vim.cmd("quit!")
+		-- The question named every file that loses changes, so discard them all.
+		ok, err = pcall(vim.cmd, last and "qall!" or "quit!")
 	elseif key == "y" then
-		local saved, save_err = pcall(vim.cmd, "write | quit")
-		if not saved then
-			vim.notify(tostring(save_err):match("E%d+: .*") or tostring(save_err), vim.log.levels.ERROR)
-		end
+		ok, err = pcall(vim.cmd, last and "wall | quit" or "write | quit")
+	end
+	if not ok then
+		vim.notify(tostring(err):match("E%d+: .*") or tostring(err), vim.log.levels.ERROR)
 	end
 end
 kb.map("n", "<C-q>", close_window, { desc = "Window: close (<C-q><C-q>: without saving)" })
