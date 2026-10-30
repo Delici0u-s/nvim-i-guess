@@ -13,3 +13,9 @@ end, { desc = "Terminal: toggle (vertical)" })
 kb.map({ "n", "t" }, "<C-h>n", function()
 	term.toggle("horizontal")
 end, { desc = "Terminal: toggle (horizontal)" })
+
+-- <A-e> jumps between the editor and the terminal used last (shell or
+-- Claude), back to the window you came from. Logic in utils/jump.lua.
+local jump = require("utils.jump")
+jump.setup()
+kb.map({ "n", "i", "t" }, "<A-e>", jump.toggle, { desc = "Terminal: jump between editor and terminal" })
