@@ -1,11 +1,8 @@
 -- Quick-toggle menu for the Claude Code options in settings.lua (<leader>ao).
 --
--- Picks are saved to settings.state_file (outside the repo) and applied live:
--- claudecode.nvim's terminal, diff and logger modules are set up again with
--- the new options, which keeps the server and the Claude connection running.
--- The plugin has no public "update config" API, so apply() also replaces
--- `require("claudecode").state.config`; if a plugin update breaks live
--- toggling, look there first.
+-- Picks are saved to settings.state_file (outside the repo) and applied live
+-- by calling claudecode.nvim's setup() again, which keeps the server and the
+-- Claude connection running.
 local settings = require("plugins.configs.tools.claudecode.settings")
 
 local M = {}
@@ -103,14 +100,11 @@ function M.options()
 	return opts
 end
 
---- Apply the current options to the running plugin.
+--- Apply the current options to the running plugin: setup() again re-applies
+--- config, terminal, diffs and logging. auto_start = false: the server is
+--- already running (setup would only warn that it is).
 function M.apply()
-	local opts = M.options()
-	local config = require("claudecode.config").apply(opts) -- validates
-	require("claudecode.logger").setup(config)
-	require("claudecode.terminal").setup(opts.terminal, config.terminal_cmd, config.env)
-	require("claudecode.diff").setup(config)
-	require("claudecode").state.config = config
+	require("claudecode").setup(vim.tbl_extend("force", M.options(), { auto_start = false }))
 end
 
 --- Set a toggle to a choice (nil = default), save and apply.

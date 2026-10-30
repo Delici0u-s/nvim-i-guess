@@ -22,16 +22,31 @@ local maps = {
 	{ "<C-x><C-x>", "<C-\\><C-n>", "Claude: terminal to normal mode" },
 }
 
---- Send the file/selection of the editor window you were in last.
+--- Send the file/selection of the editor window you were in last. Uses
+--- claudecode.selection, which isn't documented API: if an update changes
+--- it, warn once and carry on (Claude then learns the file on the next cursor
+--- move, as without this).
+local warned = false
 local function send_editor_context()
-	local win = require("utils.jump").last_editor()
-	local selection = require("claudecode.selection")
-	if win then
-		vim.api.nvim_win_call(win, selection.update_selection)
-	end
-	local latest = selection.get_latest_selection()
-	if latest then
-		selection.send_selection_update(latest)
+	local ok, err = pcall(function()
+		local selection = require("claudecode.selection")
+		local win = require("utils.jump").last_editor()
+		if win then
+			vim.api.nvim_win_call(win, selection.update_selection)
+		end
+		local latest = selection.get_latest_selection()
+		if latest then
+			selection.send_selection_update(latest)
+		end
+	end)
+	if not ok and not warned then
+		warned = true
+		vim.notify(
+			"Claude: couldn't tell Claude your file on connect (claudecode.nvim changed?"
+				.. " see tools/claudecode/terminal.lua): "
+				.. tostring(err),
+			vim.log.levels.WARN
+		)
 	end
 end
 

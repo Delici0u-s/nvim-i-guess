@@ -764,9 +764,10 @@ waits until the running Claude exits (switching would orphan it).
 - Splits use the plugin's native terminal: snacks' terminal closes itself on `ExitPre`, which makes
   the first `:qa!` fail while Claude runs. Floating needs snacks, so its label warns.
 - Unified diffs are read-only: switch to side by side to edit a proposal.
-- Live toggling replaces `require("claudecode").state.config` (no public API for it), and the
-  on-connect context uses `claudecode.selection`; check `toggles.lua` / `terminal.lua` first if a
-  plugin update breaks either.
+- Live toggling calls the plugin's `setup()` again (with `auto_start = false`). The on-connect
+  context uses `claudecode.selection`, which isn't documented API: if an update changes it, you
+  get one warning and Claude learns your file on the next cursor move instead. The plugin version
+  is pinned in `lazy-lock.json`; run `test/claudecode/run.lua` after `:Lazy update`.
 
 **Test:** `nvim --headless -c "luafile test/claudecode/run.lua"`. A stand-in replaces `claude` and
 your saved toggles are untouched. Covers the server and lock file, terminal keys, typed references,
