@@ -16,6 +16,13 @@ local function add_buffer()
 	vim.cmd.ClaudeCodeAdd(vim.fn.fnameescape(file))
 end
 
+--- A diffs.lua function, required on use (the plugin may not be loaded yet).
+local function diffs(name)
+	return function()
+		require("plugins.configs.tools.claudecode.diffs")[name]()
+	end
+end
+
 return {
 	{ "<leader>ac", "<cmd>ClaudeCode<CR>", desc = "Claude: toggle window" },
 	{ "<leader>af", "<cmd>ClaudeCodeFocus<CR>", desc = "Claude: focus window" },
@@ -32,8 +39,11 @@ return {
 		ft = trees,
 		desc = "Claude: add the selected files",
 	},
-	{ "<leader>aa", "<cmd>ClaudeCodeDiffAccept<CR>", desc = "Claude: accept the diff" },
-	{ "<leader>ad", "<cmd>ClaudeCodeDiffDeny<CR>", desc = "Claude: reject the diff" },
+	-- Diffs: these work from any window (diffs.lua). Inside the proposed
+	-- buffer, :w / <C-s> / <C-x> also accept and :q / <C-q> reject.
+	{ "<leader>aa", diffs("accept"), desc = "Claude: accept the diff" },
+	{ "<leader>ad", diffs("reject"), desc = "Claude: reject the diff" },
+	{ "<leader>aj", diffs("jump"), desc = "Claude: jump to a waiting diff" },
 	{ "<leader>ax", "<cmd>ClaudeCodeCloseAllDiffs<CR>", desc = "Claude: close all pending diffs" },
 	{ "<leader>aS", "<cmd>ClaudeCodeStatus<CR>", desc = "Claude: connection status" },
 	{
