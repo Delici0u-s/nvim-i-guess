@@ -63,6 +63,21 @@ end
 vim.fn.writefile({ "local a = 1", "return a" }, files.a)
 vim.fn.writefile({ "local b = 1", "return b" }, files.b)
 
+-- Stand-in connection: Claude "connects" when `connected` is set, and what
+-- Neovim would tell it about your file/selection is recorded.
+local selection = require("claudecode.selection")
+local told = {}
+local send_update = selection.send_selection_update
+selection.send_selection_update = function(sel)
+	told[#told + 1] = sel
+	return send_update(sel)
+end
+local connected = false
+local is_connected = claudecode.is_claude_connected
+claudecode.is_claude_connected = function()
+	return connected
+end
+
 -- Layout: tab 1 has a.lua in two windows, tab 2 has b.lua; Claude on the side.
 vim.cmd.edit(files.a)
 vim.cmd.split()
@@ -85,6 +100,42 @@ vim.api.nvim_buf_call(term_buf, function()
 	check(vim.fn.maparg("<C-x>", "t") == "<C-X>", "<C-x> goes to Claude in its terminal")
 	check(vim.fn.maparg("<C-x><C-x>", "t") == "<C-\\><C-N>", "<C-x><C-x> leaves terminal mode there")
 end)
+
+-- Claude connects after you're already in its terminal: it's still told
+-- which file you were in.
+connected = true
+vim.wait(WAIT, function()
+	return #told > 0
+end)
+check(told[#told] and told[#told].filePath == files.b, "on connect Claude is told your file", vim.inspect(told[#told]))
+claudecode.is_claude_connected = is_connected
+
+-- References are typed at Claude's cursor (the stand-in's terminal echoes
+-- what it's given; long paths wrap across lines).
+local function typed(text)
+	return vim.wait(WAIT, function()
+		return table.concat(vim.api.nvim_buf_get_lines(term_buf, 0, -1, false)):find(text, 1, true) ~= nil
+	end)
+end
+local b_win = vim.api.nvim_get_current_win()
+keys("<leader>ab")
+check(typed("@" .. files.b .. " "), "<leader>ab types @file into Claude's prompt")
+keys("ggVj<leader>as")
+check(typed("@" .. files.b .. "#L1-2 "), "<leader>as types @file#L1-2 for the selected lines")
+check(vim.fn.mode() == "n", "and leaves Visual mode")
+
+-- <A-e> between this file and Claude, also when Claude is hidden.
+keys("<A-e>")
+check(vim.api.nvim_get_current_buf() == term_buf, "<A-e> goes to Claude")
+vim.cmd.stopinsert()
+keys("<A-e>")
+check(vim.api.nvim_get_current_win() == b_win, "<A-e> comes back to your window")
+keys("<leader>ac")
+check(#vim.fn.win_findbuf(term_buf) == 0, "Claude hidden")
+keys("<A-e>")
+check(vim.api.nvim_get_current_buf() == term_buf, "<A-e> shows hidden Claude again (same session)")
+vim.cmd.stopinsert()
+keys("<A-e>")
 
 -- 3. Quick toggles: every choice applies (config validates it) and is saved --
 for _, toggle in ipairs(settings.toggles) do

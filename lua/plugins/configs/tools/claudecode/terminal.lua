@@ -8,6 +8,13 @@
 --
 -- Kept on purpose: <A-w>/<A-q> window cycling (Claude's <A-w> toggles workflow
 -- keywords) and <C-n> (Claude also lists with Down / j).
+--
+-- Also per Claude terminal:
+-- - <A-e> (utils/jump.lua) re-shows it the plugin's way when it's hidden.
+-- - Once Claude connects, it's told which file (and selection) you're in.
+--   The plugin only reports that when the cursor moves in a file, and you're
+--   in Claude's terminal by the time it connects, so without this Claude
+--   doesn't know what "this file" is until you move around a file again.
 local M = {}
 
 local maps = {
@@ -15,12 +22,43 @@ local maps = {
 	{ "<C-x><C-x>", "<C-\\><C-n>", "Claude: terminal to normal mode" },
 }
 
---- Set the maps on Claude terminals as they open. The plugin only knows the
+--- Send the file/selection of the editor window you were in last.
+local function send_editor_context()
+	local win = require("utils.jump").last_editor()
+	local selection = require("claudecode.selection")
+	if win then
+		vim.api.nvim_win_call(win, selection.update_selection)
+	end
+	local latest = selection.get_latest_selection()
+	if latest then
+		selection.send_selection_update(latest)
+	end
+end
+
+--- Run `fn` once Claude connects, checking every connection_wait_delay ms
+--- until connection_timeout (both claudecode.nvim settings).
+local function on_connect(fn)
+	local claudecode = require("claudecode")
+	local config = claudecode.state.config
+	local waited = 0
+	local function poll()
+		if claudecode.is_claude_connected() then
+			return fn()
+		end
+		waited = waited + config.connection_wait_delay
+		if waited <= config.connection_timeout then
+			vim.defer_fn(poll, config.connection_wait_delay)
+		end
+	end
+	poll()
+end
+
+--- Set things up on Claude terminals as they open. The plugin only knows the
 --- buffer once it has started the job, hence the schedule.
 function M.setup()
 	vim.api.nvim_create_autocmd("TermOpen", {
 		group = vim.api.nvim_create_augroup("claudecode_terminal_keys", { clear = true }),
-		desc = "Claude: terminal keys",
+		desc = "Claude: terminal keys, <A-e>, editor context on connect",
 		callback = vim.schedule_wrap(function(ev)
 			if
 				not vim.api.nvim_buf_is_valid(ev.buf)
@@ -31,6 +69,10 @@ function M.setup()
 			for _, map in ipairs(maps) do
 				vim.keymap.set("t", map[1], map[2], { buffer = ev.buf, desc = map[3] })
 			end
+			require("utils.jump").register(ev.buf, function()
+				require("claudecode.terminal").open()
+			end)
+			on_connect(send_editor_context)
 		end),
 	})
 end
