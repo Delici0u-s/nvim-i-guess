@@ -17,6 +17,12 @@ Installed automatically via mason-nvim-dap (list in `lua/plugins/configs/tools/d
 
 Test programs and a headless check: `test/debug/` (see its README).
 
+## Claude Code
+- `claude` CLI on `PATH` (https://claude.com/claude-code). claudecode.nvim itself is installed
+  by lazy.nvim. Check with `:checkhealth claudecode`.
+
+Headless check: `nvim --headless -c "luafile test/claudecode/run.lua"`.
+
 ## Language Servers (auto-installed via mason-lspconfig)
 | Server | Language |
 |---|---|

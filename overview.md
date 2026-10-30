@@ -30,6 +30,7 @@ Read this instead of re-exploring the repo.
    [File explorers](#file-explorers) ·
    [Terminal](#terminal) ·
    [Debugging (DAP)](#debugging-dap) ·
+   [Claude Code](#claude-code) ·
    [Jupyter](#jupyter) ·
    [Utilities](#utilities)
 7. [External tools](#external-tools)
@@ -98,7 +99,8 @@ lua/
 │       ├── editor/              cmp luasnip conform lsp_signature
 │       │   └── snippets/        LuaSnip definitions (global.lua, c.lua)
 │       ├── lang/                mason mason_tools treesitter lazydev
-│       └── tools/               jupynium, dap/
+│       └── tools/               jupynium, dap/, claudecode/
+│           ├── claudecode/      Claude Code bridge (see Claude Code section)
 │           └── dap/             debugger (see Debugging section)
 │               ├── init.lua     setup: adapters, signs, UI
 │               ├── settings.lua the knobs: ui, adapters, terminal, picker, venv
@@ -108,6 +110,7 @@ lua/
 └── utils/
     ├── keybinds.lua             map() wrapper used by most keymap files
     ├── terminal.lua             toggleable split terminal state machine
+    ├── jump.lua                 <A-e>: editor <-> last terminal
     └── log.lua                  file logger → stdpath("cache")/nvimdebug.log
 after/
 ├── ftplugin/markdown.lua        soft wrap for prose
@@ -117,6 +120,8 @@ scripts/zls_sync.py              downloads/verifies a zls matching `zig version`
 test/markdown/                   rendering test document + assets
 test/debug/                      debugger test programs, build.sh, headless run.lua
 test/keymaps/run.lua             headless check: every mapping has an "Area: action" desc
+test/terminal/run.lua            headless check of <A-e> (windows, tabs, hidden terminals)
+test/claudecode/run.lua          headless Claude Code check with a stand-in for `claude`
 SETUP.py                         checks system prerequisites mason cannot install
 README.md                        requirements, plus "things to remember"
 lazy-lock.json                   pinned plugin commits
@@ -282,6 +287,7 @@ Prefixes are reserved by topic. Their which-key names live in `plugins/configs/u
 | `<C-h>` | Horizontal | `keymaps/windows.lua`, `keymaps/terminal.lua` | `x` netrw hsplit, `n` horizontal terminal |
 | `<C-v>` | Vertical | `keymaps/windows.lua` | `x` netrw vsplit |
 | `<C-R>` | Markdown rendering | `ui/render_markdown.lua` | `m` toggle rendering, `l` live image preview, `w` wrap |
+| `<leader>a` | AI / Claude Code | `tools/claudecode/keymaps.lua` | `ac` toggle, `ab`/`as` reference file/lines, `aa`/`ad` accept/reject diff, `ao` options; see [Claude Code](#claude-code) |
 | `<leader>d` | Debugger | `tools/dap/keymaps.lua` | see [Debugging](#debugging-dap) for the full list |
 | `<leader>t` | Tabs / toggles | `keymaps/windows.lua`, `lsp/keymaps.lua` | `tn` new tab, `tc` close, `th` inlay hints |
 | `<leader>tt` | Trouble | `plugins/lazy/trouble.lua` | `ttx` diagnostics, `tts` symbols |
@@ -302,7 +308,8 @@ Single keys and others:
 | `<C-q>` | close window. If that would lose changes it asks: `<C-q>` again = close without saving, `y` = save and close, any other key = cancel. Replaces the built-in `<C-q>` = instant Visual block | `keymaps/windows.lua` |
 | `<A-v>` | Visual block, instantly (bare `<C-v>` waits `timeoutlen` because `<C-v>x` exists) | `keymaps/editor.lua` |
 | `<C-n>` | toggle vertical terminal | `keymaps/terminal.lua` |
-| `<C-X>` | terminal → normal mode / `:x` in normal mode | `keymaps/terminal.lua` |
+| `<C-X>` | terminal → normal mode / `:x` in normal mode. In the Claude terminal `<C-x>` goes to Claude (its chords) and `<C-x><C-x>` leaves terminal mode | `keymaps/terminal.lua`, `tools/claudecode/terminal.lua` |
+| `<A-e>` | jump between the editor window you came from and the terminal used last (shell or Claude); restores Insert mode, re-shows a hidden terminal | `keymaps/terminal.lua` → `utils/jump.lua` |
 | `gd` / `gD` | LSP definition / declaration | `lsp/keymaps.lua` |
 | `<leader>f` | LSP format | `lsp/keymaps.lua` |
 | `]]` / `[[` | next/prev reference of word under cursor | `ui/snacks.lua` |
@@ -557,6 +564,18 @@ One reusable terminal per direction (`vertical` `<C-n>`, `horizontal` `<C-h>n`).
 the window but keeps the buffer, so the shell and scrollback survive. A new terminal starts in the
 current file's directory. `<C-X>` leaves terminal mode.
 
+**`<A-e>`** (`utils/jump.lua`) jumps between editing and terminals:
+
+- From a terminal: back to the editor window you were in last (this tab first, else any tab), in
+  Insert mode if you left it in Insert mode.
+- From an editor window: to the terminal used last, in Terminal mode. Shown in this tab → that
+  window; hidden → its owner shows it again (`utils/terminal.show` for the shells, claudecode for
+  Claude; owners call `jump.register(buf, show)`); any other terminal → a vsplit.
+- "Editor window" is any non-floating window not showing a terminal: pickers and notifications
+  never count, explorers and diff windows do. Windows are tracked on `WinEnter`/`BufEnter`.
+
+**Test:** `nvim --headless -c "luafile test/terminal/run.lua"`. Modes need a real UI (tmux).
+
 ---
 
 ## Debugging (DAP)
@@ -680,6 +699,82 @@ flowchart TD
 
 ---
 
+## Claude Code
+
+**What:** [claudecode.nvim](https://github.com/coder/claudecode.nvim) connects the `claude` CLI to
+Neovim the way the VS Code extension does: Claude sees your current file and selection, can open
+files and read LSP diagnostics, and shows proposed edits as diffs you accept or reject here.
+Claude runs in a split inside Neovim; the bridge (a local WebSocket server) starts with Neovim, so
+a `claude` started elsewhere can connect with `/ide` too.
+
+**Files:** spec in `plugins/lazy/claudecode.lua` (loads on `VeryLazy`), `plugins/configs/tools/claudecode/`:
+
+| File | Role |
+|---|---|
+| `settings.lua` | **the knobs**: fixed options and every quick toggle (label, choices, the plugin options each sets). Add a toggle here; nothing else changes |
+| `toggles.lua` | `<leader>ao` menu; saves picks to `stdpath("state")/claudecode.json`; applies them live |
+| `keymaps.lua` | every `<leader>a` key, as a lazy `keys` list |
+| `references.lua` | types `@file` / `@file#L5-9` into Claude's prompt at its cursor |
+| `diffs.lua` | accept/reject/jump to diffs from any window; `<C-q>` in proposed buffers |
+| `terminal.lua` | Claude-terminal keys, `<A-e>` registration, file context on connect |
+| `picker.lua` | `<A-c>` action for snacks pickers (bound in `ui/snacks.lua`) |
+
+**How it works**
+
+```mermaid
+flowchart LR
+    nvim[Neovim<br/>claudecode server] -- lock file<br/>~/.claude/ide/PORT.lock --> claude[claude CLI<br/>in the split]
+    claude -- openDiff / openFile / getDiagnostics --> nvim
+    nvim -- selection_changed<br/>current file + selection --> claude
+    refs["#lt;leader#gt;ab / as, #lt;A-c#gt;"] -- types @file#Lx-y --> claude
+    claude -- edit needs approval --> diff[diff tab<br/>old ⟷ proposed]
+    diff -- "#lt;C-s#gt; / :w accept<br/>#lt;C-q#gt; reject" --> claude
+```
+
+**Keys** (`<leader>a`, all in which-key)
+
+| Key | Action |
+|---|---|
+| `ac` / `af` | toggle / focus the Claude window (hiding keeps the session) |
+| `ar` / `aC` / `am` | resume a past conversation / continue the last / start with a chosen model |
+| `ab` | type `@this-file` into Claude's prompt, at its cursor (not sent) |
+| `as` | Visual: `@file#Lx-y` for the selected lines. In netrw or a snacks explorer/list: the file(s) under the cursor, marked or selected |
+| `<A-c>` | in any snacks picker: reference the picked files (`<Tab>` for several; grep results reference their line) |
+| `aa` / `ad` | accept / reject the diff in this tab, else the only waiting one, else ask which |
+| `aj` / `ax` | jump to a waiting diff / reject all waiting diffs |
+| `aS` / `ao` | connection status / options menu |
+| `<A-e>` | editor ⟷ Claude (see [Terminal](#terminal)) |
+
+In the Claude terminal, `<C-x>` is Claude's chord prefix (`<C-x><C-k>` stop agents, `<C-x><C-e>`
+editor, …), so `<C-x><C-x>` leaves terminal mode there.
+
+**Diffs.** Claude only shows a diff when it *asks* before an edit: in auto mode or accept-edits
+mode it edits directly. `Shift+Tab` in Claude cycles the mode. In the proposed (right) window:
+edit freely, then `<C-s>` / `:w` / `<C-x>` accept (with your edits) and `<C-q>` rejects. conform
+doesn't format it (`BufWriteCmd` skips `BufWritePre`). Windows and tabs are restored exactly after
+a diff closes.
+
+**Quick toggles** (`<leader>ao`, saved, applied without restarting Claude): window (split
+right/left, floating, none), split width, diffs in a new tab or the current one, layout (side by
+side, stacked, unified), Claude terminal shown in diff tabs, focus on diff open, focus after
+sending, log level. Side and width apply when the window is next shown; split ↔ floating ↔ none
+waits until the running Claude exits (switching would orphan it).
+
+**Gotchas**
+- Splits use the plugin's native terminal: snacks' terminal closes itself on `ExitPre`, which makes
+  the first `:qa!` fail while Claude runs. Floating needs snacks, so its label warns.
+- Unified diffs are read-only: switch to side by side to edit a proposal.
+- Live toggling replaces `require("claudecode").state.config` (no public API for it), and the
+  on-connect context uses `claudecode.selection`; check `toggles.lua` / `terminal.lua` first if a
+  plugin update breaks either.
+
+**Test:** `nvim --headless -c "luafile test/claudecode/run.lua"`. A stand-in replaces `claude` and
+your saved toggles are untouched. Covers the server and lock file, terminal keys, typed references,
+`<A-e>`, the on-connect context, every toggle, and accept/reject/edit in every layout and tab mode
+with the file in several windows and tabs, several waiting diffs, a new file and a 40×12 screen.
+
+---
+
 ## Jupyter
 
 **What:** jupynium.nvim drives a Jupyter notebook in Firefox from a `.ju.py` file.
@@ -722,9 +817,11 @@ Full list with install hints: `README.md`. `python3 SETUP.py` checks which are p
 |---|---|---|
 | Markdown rendering | open `test/markdown/markdown_view_test.md` | every rendering feature, by eye (assets include spaces in paths, wide images) |
 | Debugger | `test/debug/build.sh`, then `nvim --headless -c "luafile test/debug/run.lua"` | config loads, adapters registered, keys mapped, real session per language stops on the `BREAK` line, UI actions work. `DAP_TEST_UI=…`, `DAP_TEST_ONLY=…` |
+| Claude Code | `nvim --headless -c "luafile test/claudecode/run.lua"` | server + lock file, terminal keys, typed references, on-connect context, every quick toggle, diffs in every layout/tab mode with many windows, tabs and waiting diffs, new file, tiny screen |
+| `<A-e>` | `nvim --headless -c "luafile test/terminal/run.lua"` | lands in the right window with several windows, tabs, floats, hidden/closed/several terminals |
 | Keymaps | `nvim --headless --cmd "set verbose=1" -c "luafile test/keymaps/run.lua"` | every global map and lazy key from this config has an `"Area: action"` desc; built-in keys parse for every mode and `<CR>` on one opens its help |
 
-Both headless tests exit non-zero on failure. Smoke check that any lazy plugin's config runs:
+The headless tests exit non-zero on failure. Smoke check that any lazy plugin's config runs:
 
 ```sh
 nvim --headless -c 'lua require("lazy").load({ plugins = { "<name>" } })' -c 'qa!'
@@ -743,5 +840,7 @@ nvim --headless -c 'lua require("lazy").load({ plugins = { "<name>" } })' -c 'qa
   `test/debug/`.
 - [x] Cleanup: `STRUCTURE.md` folded into this file, stale paths in comments fixed, unused
   `cpptools` and dressing.nvim removed.
+- [x] Claude Code: claudecode.nvim in a split, `<leader>a` keys, typed `@file#Lx-y` references,
+  diffs from any window, live quick toggles, `<A-e>`, `test/claudecode/`, `test/terminal/`.
 - [ ] Optional: persistent breakpoints across restarts; build before launch (e.g. `zig build`).
 - [ ] `test/keymaps/run.lua` doesn't cover buffer-local maps (LSP, netrw).
