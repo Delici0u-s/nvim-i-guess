@@ -63,7 +63,11 @@ function M.setup()
 
 	local placement_new = placement.new
 	placement.new = function(buf, src, opts)
-		local live = opts and opts.inline and opts.conceal and not vim.g.markdown_live_off and cursor_in(buf, opts.range)
+		local live = opts
+			and opts.inline
+			and opts.conceal
+			and not vim.g.markdown_live_off
+			and cursor_in(buf, opts.range)
 		if live then
 			opts.conceal = false
 		end

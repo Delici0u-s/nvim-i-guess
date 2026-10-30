@@ -21,13 +21,11 @@ local conds = require("luasnip.extras.conditions")
 local conds_expand = require("luasnip.extras.conditions.expand")
 
 local function copy(args)
-  return args[1]
+	return args[1]
 end
-
 
 ls.add_snippets("all", {
 	s("Hi", {
-		t("\"Hello World\"")
-	})
+		t('"Hello World"'),
+	}),
 })
-
