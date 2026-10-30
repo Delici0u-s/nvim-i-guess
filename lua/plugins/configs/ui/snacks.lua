@@ -13,6 +13,18 @@ return function()
 		},
 		picker = {
 			enabled = true,
+			-- <A-c> in any picker adds the picked files to Claude's context.
+			actions = {
+				claude_add = function(picker)
+					require("plugins.configs.tools.claudecode.picker").add(picker)
+				end,
+			},
+			win = {
+				input = {
+					keys = { ["<A-c>"] = { "claude_add", mode = { "n", "i" }, desc = "Claude: add to context" } },
+				},
+				list = { keys = { ["<A-c>"] = { "claude_add", desc = "Claude: add to context" } } },
+			},
 			sources = {
 				explorer = {
 					hidden = true, -- show dotfiles by default
