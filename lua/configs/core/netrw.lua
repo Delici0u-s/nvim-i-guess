@@ -30,6 +30,12 @@ vim.g.netrw_list_hide = M.hidden
 vim.g.netrw_hide = 1 -- 0 = show all, 1 = hide matches, 2 = show only matches
 vim.g.netrw_sizestyle = "H" -- human-readable sizes
 vim.g.netrw_localcopydircmd = "cp -r"
+-- netrw applies this string via setlocal to every explorer buffer, on setup
+-- AND on each directory change. The default is "noma nomod nonu nobl nowrap
+-- ro": its built-in "nonu" turns numbers off in netrw no matter what
+-- autocmds do. Swapping in "nu" is netrw's own supported knob (netrw_bufsets
+-- in :h netrw). relativenumber is omitted, so it inherits the global setting.
+vim.g.netrw_bufsettings = "noma nomod nu nowrap ro nobl"
 
 --- Redraw the current netrw buffer so a global change takes effect.
 -- local function refresh()
