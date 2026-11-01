@@ -37,39 +37,13 @@ vim.g.netrw_localcopydircmd = "cp -r"
 -- in :h netrw). relativenumber is omitted, so it inherits the global setting.
 vim.g.netrw_bufsettings = "noma nomod nu nowrap ro nobl"
 
---- Redraw the current netrw buffer so a global change takes effect.
--- local function refresh()
--- 	if vim.bo.filetype ~= "netrw" then
--- 		return
--- 	end
--- 	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Plug>NetrwRefresh", true, false, true), "n", false)
--- end
---- Redraw the current netrw buffer so a global change takes effect.
----
---- Cursor position is restored by *name*, not line number: toggling hidden
---- files changes how many entries precede the cursor, so the old line number
---- points somewhere else after the redraw.
+local ops = require("utils.netrw")
+
+--- Redraw the current netrw buffer so a global change takes effect. Keeps
+--- the tree's expanded folders, sort order and the entry under the cursor
+--- (by path: toggling hidden files shifts line numbers).
 local function refresh()
-	if vim.bo.filetype ~= "netrw" then
-		return
-	end
-
-	local entry = vim.fn.getline(".")
-
-	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Plug>NetrwRefresh", true, false, true), "n", false)
-
-	-- The redraw is queued by feedkeys, so restore after it drains.
-	vim.schedule(function()
-		if vim.bo.filetype ~= "netrw" or entry == "" then
-			return
-		end
-		local found = vim.fn.search("\\V\\^" .. vim.fn.escape(entry, "\\") .. "\\$", "cw")
-		if found == 0 then
-			-- Entry is now filtered out (you just hid it). Stay put rather than
-			-- jumping to line 1.
-			return
-		end
-	end)
+	ops.refresh()
 end
 
 --- Toggle whether hidden files are filtered out.
@@ -93,6 +67,15 @@ function M.toggle_banner()
 	refresh()
 end
 
+-- Keys replaced in local netrw buffers -> utils/netrw.lua function.
+M.ops = {
+	["D"] = { fn = "delete", desc = "delete entry under cursor" },
+	["d"] = { fn = "mkdir", desc = "new folder" },
+	["%"] = { fn = "new_file", desc = "new file" },
+	["R"] = { fn = "rename", desc = "rename / move entry" },
+	["<C-l>"] = { fn = "refresh", desc = "refresh, keeping tree state" },
+}
+
 -- Buffer-local maps. Must be set on FileType: netrw installs its own maps when
 -- the buffer is created, so anything global gets shadowed.
 vim.api.nvim_create_autocmd("FileType", {
@@ -109,6 +92,32 @@ vim.api.nvim_create_autocmd("FileType", {
 		map("<space>gl", M.cycle_liststyle, "cycle list style")
 		map("gb", M.toggle_banner, "toggle banner")
 		map("<space>gb", M.toggle_banner, "toggle banner")
+		-- File operations that resolve the path under the cursor (netrw's own
+		-- use a stale folder in tree view; see utils/netrw.lua). Marked files
+		-- and remote buffers still go to netrw's original mapping.
+		for lhs, op in pairs(M.ops) do
+			local orig = vim.fn.maparg(lhs, "n", false, true)
+			-- netrw remaps on every redraw; ours (a Lua callback) may still be there.
+			if orig.callback then
+				orig = vim.b[ev.buf].netrw_orig_maps and vim.b[ev.buf].netrw_orig_maps[lhs] or {}
+			else
+				local saved = vim.b[ev.buf].netrw_orig_maps or {}
+				saved[lhs] = orig
+				vim.b[ev.buf].netrw_orig_maps = saved
+			end
+			map(lhs, function()
+				if ops.handles_current() then
+					return ops[op.fn]()
+				end
+				if orig.rhs then
+					-- maparg() leaves <SID> unexpanded; it only means something inside netrw.
+					local rhs = orig.rhs:gsub("<SID>", ("<SNR>%d_"):format(orig.sid))
+					local keys = vim.api.nvim_replace_termcodes(rhs, true, true, true)
+					vim.api.nvim_feedkeys(keys, orig.noremap == 1 and "n" or "m", false)
+				end
+			end, op.desc)
+		end
+
 		map("q", "<cmd>bdelete<CR>", "close explorer")
 		map("<space>q", "<cmd>bdelete<CR>", "close explorer")
 
