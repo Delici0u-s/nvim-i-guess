@@ -81,7 +81,6 @@ function M.setup()
 			},
 		},
 	})
-
 end
 -- local function debug_lsp_completion()
 -- 	local clients = vim.lsp.get_clients({ bufnr = 0 })
