@@ -111,16 +111,23 @@ lua/
     ├── keybinds.lua             map() wrapper used by most keymap files
     ├── terminal.lua             toggleable split terminal state machine
     ├── jump.lua                 <A-e>: editor <-> last terminal
+    ├── runner.lua               <leader>r: per-project run command (shell, split, external)
+    ├── shell.lua                the user's shell: argv, quoting, its own completion, external terminal
+    ├── browse.lua               netrw-like folder/file browser in vim.ui.select (dap, runner)
+    ├── netrw.lua                netrw file ops that work in tree view (D d % R <C-l>)
     └── log.lua                  file logger → stdpath("cache")/nvimdebug.log
 after/
 ├── ftplugin/markdown.lua        soft wrap for prose
 └── queries/markdown_inline/     extra conceals (link titles, escapes)
 queries/html/images.scm          override of snacks.image's <img> query (see header)
 scripts/zls_sync.py              downloads/verifies a zls matching `zig version`
+scripts/zsh_complete.zsh         prints zsh's own completions for a line (utils/shell.lua)
 test/markdown/                   rendering test document + assets
 test/debug/                      debugger test programs, build.sh, headless run.lua
 test/keymaps/run.lua             headless check: every mapping has an "Area: action" desc
 test/terminal/run.lua            headless check of <A-e> (windows, tabs, hidden terminals)
+test/netrw/run.lua               headless check of netrw tree-view D/d/R and tree refresh
+test/runner/run.lua              headless check of the project runner
 test/claudecode/run.lua          headless Claude Code check with a stand-in for `claude`
 SETUP.py                         checks system prerequisites mason cannot install
 README.md                        requirements, plus "things to remember"
@@ -302,7 +309,9 @@ Single keys and others:
 | `F5` `F9` `F10` `F11` `S-F11` | debug: continue, breakpoint, over, into, out | `tools/dap/keymaps.lua` |
 | `<leader>?` | which-key: this buffer's keymaps | `ui/which_key.lua` |
 | `<C-l>` | toggle search highlight | `keymaps/editor.lua` |
-| `<C-S>` | save (normal and insert) | `keymaps/editor.lua` |
+| `<C-S>` | save (normal and insert), then the run command if run-on-save is on, then macro `@s` (normal) | `keymaps/editor.lua` |
+| `<leader>rS` | runner menu: run, stop, output and every setting with its current value | `keymaps/terminal.lua` → `utils/runner.lua` |
+| `<leader>r…` | runner: `r` run, `o` show/hide output, `k` stop; settings under `s`: `sc` command, `st` where it runs, `sd` run folder, `ss` run on `<C-S>`, `sf` focus output while running; `:Run [cmd]` | `keymaps/terminal.lua` → `utils/runner.lua` |
 | `<C-a>{reg}` | run macro from register | `keymaps/editor.lua` |
 | `<A-w>` / `<A-q>` | next / previous window (`<C-w>w` / `<C-w>W` in one chord; also from a terminal; a count jumps to window N) | `keymaps/windows.lua` |
 | `<C-q>` | close window. If that would lose changes it asks: `<C-q>` again = close without saving, `y` = save and close, any other key = cancel. Replaces the built-in `<C-q>` = instant Visual block | `keymaps/windows.lua` |
@@ -324,7 +333,8 @@ Nvim 0.11 built-in LSP maps (not redefined): `grn` rename, `gra` code action, `g
 `gri` implementation, `K` hover, `<C-s>` (insert) signature help.
 
 netrw buffer-local: `gh` hidden files, `gl` list style, `gb` banner, `q` close (each also with a
-`<space>` prefix).
+`<space>` prefix); `D` delete, `d` new folder, `%` new file, `R` rename, `<C-l>` refresh replace
+netrw's own (see Explorers).
 
 > [!WARNING]
 > Ctrl-key prefixes shadow builtins: `<C-t>` tag-pop, `<C-h>` window left, `<C-v>` visual block,
@@ -552,7 +562,15 @@ via the kitty graphics protocol (Ghostty).
   Inside it, `<C-h>` toggles hidden files and `<C-i>` toggles ignored files.
 - **netrw** (kept for splits and `scp://`): `<C-e>x`, `<C-h>x`, `<C-v>x`. Tree view, no banner.
   Toggles are in `core/netrw.lua`. netrw's hide state is global, so `refresh()` redraws and puts
-  the cursor back on the same entry by name.
+  the cursor back on the same entry by path.
+- **netrw file ops** (`utils/netrw.lua`): netrw's own `D` `d` `%` `R` use a stale folder in tree
+  view (the one expanded last), so `D` failed with "unable to delete directory" or could hit a
+  same-named folder elsewhere; and its refresh re-sorts expanded folders alphabetically, ignoring
+  `g:netrw_sort_sequence`. The replacements act on the line under the cursor (`d`/`%` on a folder
+  create inside it, on a file next to it; `D` confirms, default No; `R` won't overwrite), and the
+  refresh re-expands the open folders netrw's normal way, so order and open state survive.
+  Marked files (`mf`) and `scp://` buffers still use netrw's originals.
+  **Test:** `nvim --headless -c "luafile test/netrw/run.lua"`.
 
 ---
 
@@ -576,6 +594,32 @@ current file's directory. `<C-X>` leaves terminal mode.
 
 **Test:** `nvim --headless -c "luafile test/terminal/run.lua"`. Modes need a real UI (tmux).
 
+**Runner** (`utils/runner.lua`; `<leader>rS` menu, `<leader>r…` shortcuts): one command per
+project (root = nearest `.git`/`build.zig`/… from `settings.root_markers`, else cwd), remembered
+with its settings across restarts in `stdpath("state")/runner.json`. A still-running previous run
+is stopped first, the exit status is a notification, `<A-e>` jumps into the output and back.
+Everything runs in your shell (`utils/shell.lua`: `vim.o.shell`, interactive so the rc file's
+aliases and PATH apply).
+
+- **Where** (default `settings.target`): `vertical`/`horizontal` types `nrun [-C dir] cmd` into
+  the `<C-n>`/`<C-h>n` shell. `nrun` is a function in `stdpath("state")/runner/nrun.sh` that runs
+  cmd in a subshell and reports the exit status as an OSC 777 sequence (`TermRequest`). A shell
+  without it sources it first (one longer line); `[ -n "$NVIM" ] && . ~/.local/state/nvim/runner/nrun.sh`
+  in `.zshrc` avoids that. `-C` is left out when the shell is already in the folder (known from its
+  OSC 7). A busy shell gets `Ctrl-C` first. `split`/`vsplit` is a dedicated output window replaced
+  each run; `external` opens a terminal emulator window (`utils/shell.lua` settings `external`,
+  else `$TERMINAL`, else the first installed of `external_candidates`) that closes when done, or
+  stays open on failure (`external_hold`).
+- **Folder**: the current file's folder (default), the project root, or one browsed to
+  (`utils/browse.lua`) or typed. `%` is the current file relative to it (`%<`, `%:t`, … work).
+- **Focus** (default off): the cursor goes into the output in Terminal mode while it runs (for
+  programs reading stdin) and back where it was when the program exits, unless you moved on.
+- **Completion** in the command prompt (live while typing, fetched in the background after
+  `settings.live_delay`; `<Tab>` cycles) and `:Run` (`<Tab>`): your shell's own (zsh through
+  `scripts/zsh_complete.zsh` with your interactive `fpath`, so oh-my-zsh completions count; fish
+  through `complete -C`), run in the run folder. Other shells: programs, then files.
+**Test:** `nvim --headless -c "luafile test/runner/run.lua"`.
+
 ---
 
 ## Debugging (DAP)
@@ -588,10 +632,10 @@ indicator.
 
 | File | Role |
 |---|---|
-| `settings.lua` | **the knobs**: `ui`, `adapters`, `external_terminal`, `picker_skip_dirs`, `venv_dirs` |
+| `settings.lua` | **the knobs**: `ui`, `adapters`, `external_terminal` (nil: `utils/shell.lua`'s), `picker_skip_dirs`, `venv_dirs` |
 | `init.lua` | setup: virtual text, mason-nvim-dap handlers, signs and highlights, UI setup |
 | `keymaps.lua` | every debugger key, as a lazy `keys` list (the spec uses it directly) |
-| `launch.lua` | `pick_program`, `ask_args`, `python_path`, `improve(config)` |
+| `launch.lua` | `pick_program` (browser: `utils/browse.lua`), `ask_args`, `python_path`, `improve(config)` |
 | `ui/init.lua` | UI front-end the keymaps call; dispatches to the selected backend |
 | `ui/{dap_ui,dap_view,widgets}.lua` | one backend per UI |
 
