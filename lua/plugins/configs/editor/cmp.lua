@@ -82,9 +82,9 @@ function M.setup()
 		},
 	})
 
-	-- Command-line popup (cmp-cmdline). The popup appears only after this many
-	-- typed characters, so short commands like :w stay quiet.
-	local cmdline_min_chars = 2
+	-- Command-line popup (cmp-cmdline). The popup appears after this many typed
+	-- characters; raise it if short commands like :w feel noisy.
+	local cmdline_min_chars = 1
 	-- <Tab>/<S-Tab> cycle (preset), plus the same <C-J>/<C-K> as in insert mode.
 	local cmdline_mapping = cmp.mapping.preset.cmdline({
 		["<C-J>"] = { c = cmp.mapping.select_next_item() },
