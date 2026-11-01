@@ -4,7 +4,9 @@
 -- function, padded wide), then the description, so the description ended up
 -- under the preview. Here the description comes right after the key, and the
 -- rhs only follows when it is a real string (e.g. "<cmd>Hex<CR>"). Built-in
--- keys (dd, ciw, <C-w>v, ...) are listed too, tagged "builtin".
+-- keys (dd, ciw, <C-w>v, ...) are listed too, tagged "builtin". Alt keys are
+-- shown as <A-x> like the config writes them (Neovim calls them <M-x>), and
+-- either spelling finds them.
 --
 -- Commands: snacks matches only the command name. The description is added
 -- to the searchable text so you can find a command by what it does.
@@ -89,6 +91,25 @@ end
 local covers =
 	{ n = { "n", " " }, v = { "v", "x", " " }, o = { "o", " " }, i = { "i", "!" }, c = { "c", "!" }, t = { "t" } }
 
+--- How a key is shown. Neovim (and snacks' normkey) name the Alt modifier
+--- "M-" (<A-e> and <M-e> are the same key), but this config writes "A-", so
+--- the picker shows "A-" too: "<M-e>" -> "<A-e>", "<C-M-x>" -> "<A-C-X>".
+local function display_lhs(lhs)
+	return (
+		Snacks.util.normkey(lhs):gsub("<([^>]+)>", function(inner)
+			-- Modifiers are "X-" prefixes; the rest (even "-", as in <M-->) is the key.
+			local mods, i = {}, 1
+			while inner:sub(i + 1, i + 1) == "-" and i + 1 < #inner do
+				local m = inner:sub(i, i)
+				mods[#mods + 1] = (m == "M" and "A" or m) .. "-"
+				i = i + 2
+			end
+			return "<" .. table.concat(mods) .. inner:sub(i) .. ">"
+		end)
+	)
+end
+M.display_lhs = display_lhs
+
 --- snacks' keymap finder plus the built-in keys, with column widths taken
 --- from the content so the format can align on them.
 local function keymap_finder(opts, ctx)
@@ -99,6 +120,12 @@ local function keymap_finder(opts, ctx)
 		local lhs = Snacks.util.normkey(item.item.lhs)
 		mapped[item.item.mode .. lhs] = true
 		item.tag = (item.item.buffer or 0) > 0 and "buf" or ""
+		-- snacks' search text has only the "M-" spelling; add the shown one
+		-- so typing <A-e> finds the key as well as <M-e>.
+		local shown = display_lhs(lhs)
+		if shown ~= lhs then
+			item.text = shown .. " " .. item.text
+		end
 	end
 
 	if opts.builtin then
@@ -124,7 +151,7 @@ local function keymap_finder(opts, ctx)
 
 	local lhs_width, tag_width = 0, 0
 	for _, item in ipairs(items) do
-		lhs_width = math.max(lhs_width, vim.api.nvim_strwidth(Snacks.util.normkey(item.item.lhs)))
+		lhs_width = math.max(lhs_width, vim.api.nvim_strwidth(display_lhs(item.item.lhs)))
 		tag_width = math.max(tag_width, #item.tag)
 	end
 	for _, item in ipairs(items) do
@@ -139,7 +166,7 @@ local function keymap_format(item)
 	local ret = {
 		{ k.mode, "SnacksPickerKeymapMode" },
 		{ " " },
-		{ align(Snacks.util.normkey(k.lhs), item.lhs_width), "SnacksPickerKeymapLhs" },
+		{ align(display_lhs(k.lhs), item.lhs_width), "SnacksPickerKeymapLhs" },
 		{ " " },
 	}
 	if item.tag_width > 0 then

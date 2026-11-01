@@ -81,10 +81,34 @@ for _, mode in ipairs({ "n", "i", "v", "o", "c" }) do
 	end
 end
 
+-- Alt keys are shown as "A-" (Neovim names them "M-"), only the modifier changes.
+for input, want in pairs({
+	["<M-e>"] = "<A-e>",
+	["<A-e>"] = "<A-e>",
+	["<C-M-x>"] = "<A-C-X>", -- normkey orders modifiers like Neovim does
+	["<M-CR>x<M-->"] = "<A-CR>x<A-->",
+	["<C-t>M"] = "<C-T>M",
+}) do
+	local got = pickers.display_lhs(input)
+	if got ~= want then
+		failures[#failures + 1] = ("keymap picker: display_lhs(%q) = %q, want %q"):format(input, got, want)
+	end
+end
+
 local picker = pickers.keymaps()
 vim.wait(5000, function()
 	return #picker:items() > 0 and not picker:is_active()
 end, 20)
+-- Every Alt mapping is searchable by both spellings.
+for _, item in ipairs(picker:items()) do
+	local lhs = not item.builtin and Snacks.util.normkey(item.item.lhs)
+	if lhs and lhs:find("M%-") then
+		local shown = pickers.display_lhs(lhs)
+		if not (item.text:find(shown, 1, true) and item.text:find(lhs, 1, true)) then
+			failures[#failures + 1] = ("keymap picker: %s not searchable as %s and %s"):format(lhs, shown, lhs)
+		end
+	end
+end
 local builtin = vim.iter(picker:items()):find(function(i)
 	return i.builtin
 end)
