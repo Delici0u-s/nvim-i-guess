@@ -60,7 +60,12 @@ return function()
 		},
 	})
 
-	dap.defaults.fallback.external_terminal = settings.external_terminal
+	local term = settings.external_terminal
+	if not term then
+		local argv = require("utils.shell").external_terminal()
+		term = argv and { command = argv[1], args = vim.list_slice(argv, 2) } or nil
+	end
+	dap.defaults.fallback.external_terminal = term
 
 	-- Signs. Rainglow themes run `highlight clear`, which drops these groups,
 	-- so they are re-linked on every colourscheme change.

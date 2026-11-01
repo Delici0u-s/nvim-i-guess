@@ -15,12 +15,11 @@ return {
 	--   python   -- debugpy
 	adapters = { "codelldb", "python" },
 
-	-- Terminal for configurations that ask for an external console
-	-- (e.g. a launch.json with "console": "externalTerminal").
-	external_terminal = {
-		command = os.getenv("TERMINAL") or "ghostty",
-		args = { "-e" },
-	},
+	-- Terminal for configurations that ask for an external console (e.g. a
+	-- launch.json with "console": "externalTerminal"), as nvim-dap's
+	-- { command, args }. nil: the one utils/shell.lua finds (its settings
+	-- `external` / `external_candidates`, shared with the runner).
+	external_terminal = nil,
 
 	-- Program picker: directories not descended into when listing executables.
 	-- Hidden directories (.git, .venv, .zig-cache, ...) are always skipped.

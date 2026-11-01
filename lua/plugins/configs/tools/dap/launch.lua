@@ -81,64 +81,45 @@ function M.executables(root)
 	end, found)
 end
 
--- Picker entry kinds: label suffix (the `ls -F` convention, so the kind shows
--- even without colour) and the theme group used where vim.ui.select supports
--- highlighted chunks (snacks does).
-local kinds = {
-	dir = { suffix = "/", hl = "Directory" },
-	program = { suffix = "*", hl = "Function" },
-	action = { suffix = "", hl = "Special" },
-}
+-- Picker entries for programs get the `ls -F` executable suffix; the rest
+-- of the labels and the browser come from utils/browse.lua.
+local browser = require("utils.browse")
+local kinds = { file = { suffix = "*", hl = "Function" } }
 
---- vim.ui.select over entries { name, kind }; waits for the answer.
-local function pick(entries, prompt)
+--- dap's coroutine-aware vim.ui.select (inputlist outside a coroutine);
+--- waits for the answer, so it also drives utils/browse synchronously.
+local function select(items, opts, cb)
 	local ui = require("dap.ui")
-	return (in_coroutine() and ui.pick_one or ui.pick_one_sync)(entries, prompt, function(e, chunks)
-		local kind = kinds[e.kind]
-		local label = e.name .. kind.suffix
-		return chunks and { { label, kind.hl } } or label
+	cb((in_coroutine() and ui.pick_one or ui.pick_one_sync)(items, opts.prompt, opts.format_item))
+end
+
+local function pick(entries, prompt)
+	local chosen
+	select(entries, {
+		prompt = prompt,
+		format_item = function(e, chunks)
+			return browser.format(e, chunks, kinds)
+		end,
+	}, function(e)
+		chosen = e
 	end)
+	return chosen
 end
 
 --- One directory level for the browser: "../", subdirectories (hidden ones
 --- last), then programs.
 function M.list_dir(dir)
-	local dirs, files = {}, {}
-	for name, type in vim.fs.dir(dir) do
-		local path = vim.fs.joinpath(dir, name)
-		if type == "directory" or (type == "link" and vim.fn.isdirectory(path) == 1) then
-			dirs[#dirs + 1] = { path = path, name = name, kind = "dir", hidden = name:sub(1, 1) == "." }
-		elseif is_program(path) then
-			files[#files + 1] = { path = path, name = name, kind = "program" }
-		end
-	end
-	table.sort(dirs, function(a, b)
-		if a.hidden ~= b.hidden then
-			return b.hidden
-		end
-		return a.name < b.name
-	end)
-	table.sort(files, function(a, b)
-		return a.name < b.name
-	end)
-	local entries = {}
-	local parent = vim.fs.dirname(dir)
-	if parent ~= dir then
-		entries[1] = { path = parent, name = "..", kind = "dir" }
-	end
-	return vim.list_extend(vim.list_extend(entries, dirs), files)
+	return browser.list(dir, is_program)
 end
 
 --- Browse for a program like netrw: pick a directory to enter it ("../" goes
 --- up), pick a program to choose it. Returns nil if cancelled.
 local function browse(dir)
-	while true do
-		local entry = pick(M.list_dir(dir), "Browse " .. vim.fn.fnamemodify(dir, ":~") .. ": ")
-		if not entry or entry.kind ~= "dir" then
-			return entry and entry.path
-		end
-		dir = entry.path
-	end
+	local chosen
+	browser.browse(dir, { files = is_program, kinds = kinds, select = select }, function(path)
+		chosen = path
+	end)
+	return chosen
 end
 
 --- Type the program path (with file completion).
@@ -173,7 +154,7 @@ function M.pick_program()
 		chosen = browse(browse_from)
 	else
 		local entries = vim.tbl_map(function(path)
-			return { path = path, name = vim.fs.relpath(root, path) or path, kind = "program" }
+			return { path = path, name = vim.fs.relpath(root, path) or path, kind = "file" }
 		end, programs)
 		vim.list_extend(entries, {
 			{ action = browse, name = "Browse…", kind = "action" },
