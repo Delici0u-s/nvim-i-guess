@@ -20,9 +20,10 @@ local terminals = {
 }
 
 --- Open a split in the current tab showing the terminal, starting it if it
---- isn't running.
-local function open(direction, term)
+--- isn't running. Focuses it in Terminal mode unless `focus` is false.
+local function open(direction, term, focus)
 	local dir = get_buf_dir() -- capture before switching windows
+	local from = vim.api.nvim_get_current_win()
 
 	vim.cmd(direction == "vertical" and "vsplit" or "split")
 	term.win = vim.api.nvim_get_current_win()
@@ -39,7 +40,11 @@ local function open(direction, term)
 		vim.api.nvim_win_set_buf(term.win, term.buf)
 	end
 
-	vim.cmd("startinsert")
+	if focus == false then
+		vim.api.nvim_set_current_win(from)
+	else
+		vim.cmd("startinsert")
+	end
 end
 
 local function get(direction)
@@ -85,6 +90,32 @@ function M.show(direction)
 		return vim.cmd("startinsert")
 	end
 	open(direction, term)
+end
+
+--- True when the terminal is shown in the current tab.
+---@param direction "vertical"|"horizontal"
+function M.visible(direction)
+	local term = terminals[direction]
+	return term ~= nil
+		and term.win ~= nil
+		and vim.api.nvim_win_is_valid(term.win)
+		and vim.api.nvim_win_get_tabpage(term.win) == vim.api.nvim_get_current_tabpage()
+		and vim.api.nvim_win_get_buf(term.win) == term.buf
+end
+
+--- Show the terminal in this tab without moving focus, starting it if it
+--- isn't running. For sending it input (utils/runner.lua).
+---@param direction "vertical"|"horizontal"
+---@return integer|nil buf
+function M.ensure(direction)
+	local term = get(direction)
+	if not term then
+		return nil
+	end
+	if not M.visible(direction) then
+		open(direction, term, false)
+	end
+	return term.buf
 end
 
 return M

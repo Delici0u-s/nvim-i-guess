@@ -9,14 +9,20 @@ kb.map(
 	{ silent = true, expr = true, desc = "Editor: toggle search highlight" }
 )
 
--- <C-S> saves. In insert mode it round-trips out and back so the cursor
--- position and insert state are preserved.
-kb.map("n", "<C-S>", ":w<cr>@s", { silent = true, desc = "Editor: save" })
+-- <C-S> saves, then runs the project command if run-on-save is on
+-- (utils/runner.lua, <leader>rss), then macro @s. In insert mode it
+-- round-trips out and back so the cursor position and insert state are kept.
+kb.map("n", "<C-S>", function()
+	vim.cmd.write()
+	require("utils.runner").on_save()
+	vim.api.nvim_feedkeys("@s", "n", false)
+end, { silent = true, desc = "Editor: save (+ run on save, @s)" })
 kb.map("i", "<C-S>", function()
 	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", true)
 	vim.cmd("w")
+	require("utils.runner").on_save()
 	vim.api.nvim_feedkeys("i", "n", true)
-end, { silent = true, desc = "Editor: save (stay in insert)" })
+end, { silent = true, desc = "Editor: save (stay in insert, + run on save)" })
 
 -- Visual block without a wait. <C-v> is a mapping prefix here (<C-v>x), so the
 -- bare <C-v> only starts Visual block after 'timeoutlen'; the built-in instant

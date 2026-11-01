@@ -19,6 +19,8 @@ return function()
 			{ "<leader>j", group = "Jupyter" },
 			{ "<leader>jl", group = "Load notebook tab" },
 			{ "<leader>g", group = "Git" },
+			{ "<leader>r", group = "Run" },
+			{ "<leader>rs", group = "Run settings" },
 			{ "<C-t>", group = "Pickers" },
 			{ "<C-e>", group = "Explore" },
 			{ "<C-h>", group = "Horizontal split" },
