@@ -1,8 +1,14 @@
+# Neovim config
+
+Personal Neovim config (lazy.nvim, built-in LSP, DAP, Claude Code, rendered markdown).
+
+**Docs**
+- [`user_overview.md`](user_overview.md): every feature, key and command, one line each.
+  Start here when you forget what exists.
+- [`impl_overview.md`](impl_overview.md): how it is built, where everything lives, how to extend it.
+- This file: requirements. `python3 SETUP.py` checks which system tools are missing.
+
 # Requirements
-
-> How the config is built, where everything lives and how to extend it:
-> see `overview.md`. This file lists requirements only.
-
 
 ## Core
 - Neovim ≥ 0.11.3 (uses `vim.lsp.config` / `vim.lsp.enable`)
@@ -63,6 +69,20 @@ Headless check: `nvim --headless -c "luafile test/claudecode/run.lua"`.
 - Docker — for `dockerls`
 - Terraform — for `terraformls`
 
+## Optional (Assembly)
+`asm_lsp` is installed by mason, but reads its settings from a file outside this repo.
+Create `~/.config/asm-lsp/.asm-lsp.toml`:
+```toml
+[default_config]
+assembler = "nasm"
+instruction_set = "x86-64"
+
+[default_config.opts]
+compiler = "nasm"
+diagnostics = true
+default_diagnostics = true
+```
+
 ## Optional (Markdown rendering)
 Headings/tables/callouts come from render-markdown.nvim (no deps). Inline
 images, LaTeX and diagrams come from snacks.image and need a terminal with
@@ -78,15 +98,3 @@ the kitty graphics protocol (Ghostty, kitty).
   built from grammar, so it needs tree-sitter-cli)
 
 Test file: `test/markdown/markdown_view_test.md` (assets in `test/markdown/markdown_test_assets/`).
-
-## Things to remember
-- Jupiter Notebook
-    - `:JupyniumStartAndAttachToServer`
-    - `:JupyniumStartSync <opt filename>`
-    - `# %%` for code block
-    - `<space>x` to execude code block and see results in firefox
-    - `.ju.py` as filename
-    - to convert .ipynb to .ju.py:
-        - open `.ipynb` in browser after start and attach server
-        - in ner nvim buffer run `:JupyniumLoadFromIpynbTab`
-        - save buffer

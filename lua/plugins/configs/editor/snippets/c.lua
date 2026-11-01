@@ -5,7 +5,7 @@ local i = ls.insert_node
 local f = ls.function_node
 
 -- Header guard snippet for C/C++ headers (with proper spacing)
-ls.add_snippets("cpp", {
+local c_snippets = {
 	s("headerguard", {
 		-- #ifndef and #define
 		f(function(_, snip)
@@ -36,4 +36,8 @@ ls.add_snippets("cpp", {
 		t({ "", "" }), -- empty line before #endif
 		t({ "#endif" }),
 	}),
-})
+}
+
+-- Same snippets in C and C++.
+ls.add_snippets("c", c_snippets)
+ls.add_snippets("cpp", c_snippets)

@@ -2,13 +2,15 @@ import shutil
 import subprocess
 import sys
 
+MIN_NVIM = (0, 11, 3)  # vim.lsp.config / vim.lsp.enable; keep in sync with README.md
+
 # ── System prerequisites ───────────────────────────────────────────────────────
 # Mason (mason-lspconfig + mason-tool-installer) handles LSP servers and
 # formatters automatically on first launch. This script only checks the
 # external system dependencies that Mason cannot install.
 
 REQUIRED = [
-    ("nvim", "Neovim ≥ 0.11"),
+    ("nvim", f"Neovim ≥ {'.'.join(map(str, MIN_NVIM))}"),
     ("git", "git"),
     ("node", "Node.js (npm) — needed for ts_ls, eslint, html, cssls"),
     ("npm", "npm"),
@@ -53,8 +55,8 @@ def nvim_version_ok() -> bool:
         parts = first.strip().split("v")
         if len(parts) < 2:
             return False
-        major, minor, *_ = parts[1].split(".")
-        return (int(major), int(minor)) >= (0, 9)
+        major, minor, patch, *_ = (parts[1].split("-")[0] + ".0.0").split(".")
+        return (int(major), int(minor), int(patch)) >= MIN_NVIM
     except Exception:
         return False
 
@@ -73,7 +75,7 @@ def main() -> int:
     print("Jupiter notebook support: https://github.com/kiyoon/jupynium.nvim")
     print()
     if shutil.which("nvim") and not nvim_version_ok():
-        print("  ⚠  Neovim found but version is < 0.9 — upgrade recommended.")
+        print(f"  ⚠  Neovim found but older than {'.'.join(map(str, MIN_NVIM))} — upgrade required.")
         total_missing += 1
 
     if total_missing == 0:

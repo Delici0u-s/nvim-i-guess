@@ -1,13 +1,17 @@
-# Config overview
+# Implementation overview
 
 How this Neovim config is put together, where everything lives, and how to extend it.
-Read this instead of re-exploring the repo.
+Written for someone (or an agent) new to the repo: read this instead of re-exploring it.
 
 > [!NOTE]
-> **Keeping this file current.** Each subsystem has its own `##` section with the same shape
+> **Which doc holds what.** `README.md`: requirements and install. `user_overview.md`: every
+> feature, key and command a user touches, one line each. This file: how it is built.
+> Keys are listed **only** in `user_overview.md`; this file keeps the prefix ownership table.
+>
+> **Keeping the docs current.** Each subsystem here has its own `##` section with the same shape
 > (*What* / *Files* / *How it works* / *Extending* / *Gotchas*). When you add a subsystem, copy
-> that shape. When you move or rename a file, search this doc for its old path.
-> Requirements and install notes live in `README.md`; this doc only explains how things fit together.
+> that shape. A new user-facing feature or key also gets a line in `user_overview.md`. When you
+> move or rename a file, search both docs for its old path.
 
 ## Contents
 
@@ -61,7 +65,7 @@ Formatting style comes from `stylua.toml`: tabs, width 4, 120 columns, double qu
 ## Directory map
 
 ```
-init.lua                         leader keys, shell, mlang settings, then require("configs")
+init.lua                         leader keys, shell, then require("configs")
 lua/
 ├── configs/                     everything that is NOT a plugin config
 │   ├── init.lua                 the load order (core → theme → lsp → keymaps → plugins)
@@ -130,9 +134,10 @@ test/netrw/run.lua               headless check of netrw tree-view D/d/R and tre
 test/runner/run.lua              headless check of the project runner
 test/claudecode/run.lua          headless Claude Code check with a stand-in for `claude`
 SETUP.py                         checks system prerequisites mason cannot install
-README.md                        requirements, plus "things to remember"
+README.md                        requirements and install
+user_overview.md                 every user-facing feature and key, one line each
+impl_overview.md                 this file
 lazy-lock.json                   pinned plugin commits
-package.json                     tree-sitter-cli (needed to build the latex parser)
 ```
 
 ---
@@ -141,7 +146,7 @@ package.json                     tree-sitter-cli (needed to build the latex pars
 
 ```mermaid
 flowchart TD
-    A[init.lua<br/>leader = space, localleader = \\<br/>shell = zsh -ic<br/>vim.g.mlang_config] --> B[configs/init.lua]
+    A[init.lua<br/>leader = space, localleader = \\<br/>shell = zsh -ic] --> B[configs/init.lua]
     B --> C[core<br/>options, visual, behaviour,<br/>commands, netrw]
     C --> D[theme<br/>source rainglow .vim,<br/>fire ColorScheme]
     D --> E[lsp<br/>capabilities → diagnostics →<br/>servers → keymaps → zig_check]
@@ -302,39 +307,22 @@ Prefixes are reserved by topic. Their which-key names live in `plugins/configs/u
 | `<leader>g` | Git | `ui/snacks.lua` | `gb` blame line |
 | `t g` | LSP jump in new tab | `lsp/keymaps.lua` | `tgd` definition, `tgr` references |
 
-Single keys and others:
+Every individual key is listed in `user_overview.md`; the desc on each map says the rest, and
+`:verbose map <key>` gives the file. Keys outside the prefixes above live in:
 
-| Key | Action | Defined in |
-|---|---|---|
-| `F5` `F9` `F10` `F11` `S-F11` | debug: continue, breakpoint, over, into, out | `tools/dap/keymaps.lua` |
-| `<leader>?` | which-key: this buffer's keymaps | `ui/which_key.lua` |
-| `<C-l>` | toggle search highlight | `keymaps/editor.lua` |
-| `<C-S>` | save (normal and insert), then the run command if run-on-save is on, then macro `@s` (normal) | `keymaps/editor.lua` |
-| `<leader>rS` | runner menu: run, stop, output and every setting with its current value | `keymaps/terminal.lua` → `utils/runner.lua` |
-| `<leader>r…` | runner: `r` run, `o` show/hide output, `k` stop; settings under `s`: `sc` command, `st` where it runs, `sd` run folder, `ss` run on `<C-S>`, `sf` focus output while running; `:Run [cmd]` | `keymaps/terminal.lua` → `utils/runner.lua` |
-| `<C-a>{reg}` | run macro from register | `keymaps/editor.lua` |
-| `<A-w>` / `<A-q>` | next / previous window (`<C-w>w` / `<C-w>W` in one chord; also from a terminal; a count jumps to window N) | `keymaps/windows.lua` |
-| `<C-q>` | close window. If that would lose changes it asks: `<C-q>` again = close without saving, `y` = save and close, any other key = cancel. Replaces the built-in `<C-q>` = instant Visual block | `keymaps/windows.lua` |
-| `<A-v>` | Visual block, instantly (bare `<C-v>` waits `timeoutlen` because `<C-v>x` exists) | `keymaps/editor.lua` |
-| `<C-n>` | toggle vertical terminal | `keymaps/terminal.lua` |
-| `<C-X>` | terminal → normal mode / `:x` in normal mode. In the Claude terminal `<C-x>` goes to Claude (its chords) and `<C-x><C-x>` leaves terminal mode | `keymaps/terminal.lua`, `tools/claudecode/terminal.lua` |
-| `<A-e>` | jump between the editor window you came from and the terminal used last (shell or Claude); restores Insert mode, re-shows a hidden terminal | `keymaps/terminal.lua` → `utils/jump.lua` |
-| `gd` / `gD` | LSP definition / declaration | `lsp/keymaps.lua` |
-| `<leader>f` | LSP format | `lsp/keymaps.lua` |
-| `]]` / `[[` | next/prev reference of word under cursor | `ui/snacks.lua` |
-| `<leader>.` / `<leader>S` | scratch buffer / pick scratch | `ui/snacks.lua` |
-| `<leader>lg` | lazygit | `ui/snacks.lua` |
-| `zk` | peek fold, else LSP hover | `ui/ufo.lua` |
-| `<leader>x` / `<leader>k` | Jupynium execute cell / kernel hover | `tools/jupynium.lua` |
-| `<Tab>` / `<S-Tab>` | LuaSnip jump (only while a snippet is active) | `editor/luasnip.lua` |
-| `<C-J>` / `<C-K>` / `<CR>` | cmp next / prev / confirm | `editor/cmp.lua` |
-
-Nvim 0.11 built-in LSP maps (not redefined): `grn` rename, `gra` code action, `grr` references,
-`gri` implementation, `K` hover, `<C-s>` (insert) signature help.
-
-netrw buffer-local: `gh` hidden files, `gl` list style, `gb` banner, `q` close (each also with a
-`<space>` prefix); `D` delete, `d` new folder, `%` new file, `R` rename, `<C-l>` refresh replace
-netrw's own (see Explorers).
+| Where | Keys |
+|---|---|
+| `keymaps/editor.lua` | `<C-S>` save (+ runner run-on-save, `@s`), `<C-a>{reg}`, `<A-v>`, `<C-l>` |
+| `keymaps/windows.lua` | `<A-w>`/`<A-q>` window cycling, `<C-q>` close-with-prompt (replaces built-in instant Visual block) |
+| `keymaps/terminal.lua` | `<C-n>`, `<C-X>`, `<A-e>` (→ `utils/jump.lua`), `<leader>r…` (→ `utils/runner.lua`) |
+| `tools/claudecode/terminal.lua` | `<C-x>` passes to Claude in its terminal; `<C-x><C-x>` leaves terminal mode |
+| `lsp/keymaps.lua` | `gd` `gD` `<leader>f` (buffer-local). Nvim 0.11 built-ins `grn` `gra` `grr` `gri` `K` are not redefined |
+| `ui/snacks.lua` | `]]`/`[[`, `<leader>.`/`<leader>S`, `<leader>lg` |
+| `ui/ufo.lua` | `zk` and the `z` fold keys |
+| `tools/jupynium.lua` | `<leader>x`, `<leader>k` |
+| `editor/luasnip.lua`, `editor/cmp.lua` | `<Tab>`/`<S-Tab>` (only while a snippet is active), `<C-J>`/`<C-K>`/`<CR>` |
+| `core/netrw.lua` → `utils/netrw.lua` | netrw buffer-local `gh` `gl` `gb` `q` (also `<space>`-prefixed) and the `D` `d` `%` `R` `<C-l>` replacements |
+| `tools/dap/keymaps.lua` | `F5` `F9` `F10` `F11` `S-F11` |
 
 > [!WARNING]
 > Ctrl-key prefixes shadow builtins: `<C-t>` tag-pop, `<C-h>` window left, `<C-v>` visual block,
@@ -419,7 +407,6 @@ flowchart LR
   buffer-local maps. The `tg*` maps open the target in a new tab and use the client's own
   `offset_encoding` (mixing clangd and pyright on one buffer otherwise corrupts columns).
 - `mason.lua` also notifies servers of saved files (`workspace/didChangeWatchedFiles`).
-- `init.lua` defines `vim.g.mlang_config` (diagnostic filter settings for the MATLAB-style tooling).
 
 **Gotchas**
 - `K` is deliberately *not* mapped globally, so `keywordprg` still works in buffers without a server.
@@ -452,9 +439,11 @@ flowchart LR
 **Files:** `plugins/configs/editor/{cmp,luasnip,lsp_signature}.lua`, `editor/snippets/`.
 
 **How it works**
-- All load on `InsertEnter`.
+- All load on `InsertEnter`; cmp (with its sources) also on `CmdlineEnter`, for the command-line popup.
 - cmp: `<CR>` confirms (selects the first item), `<C-J>`/`<C-K>` move through items or jump in a
   snippet. Sorting: score, recently used, locality.
+- cmp-cmdline: popup on `:` (paths, then commands/arguments) and `/` `?` (buffer words) after
+  `cmdline_min_chars` typed characters. `<Tab>`/`<S-Tab>` or `<C-J>`/`<C-K>` cycle.
 - LuaSnip `<Tab>`/`<S-Tab>` only take over while a snippet is active, otherwise they pass through.
   An autocmd unlinks a snippet once you leave it, so `<Tab>` doesn't keep jumping back.
 - lsp_signature shows a floating signature window (inline hints off).
@@ -489,7 +478,7 @@ flowchart LR
 - nvim-treesitter is pinned to the **`master` branch**. The config uses
   `nvim-treesitter.configs`, which `main` removed. Don't bump the branch without rewriting.
 - `ensure_installed` + `auto_install`. `latex` is built from its grammar, so it needs
-  `tree-sitter-cli` (`package.json`).
+  `tree-sitter-cli` on `PATH` (see `README.md`).
 - Folding: nvim-ufo, provider chain **LSP → treesitter**. All folds start open (`foldlevel 99`).
   A `FileType` autocmd sets treesitter `foldexpr` for buffers ufo skips.
 - `zk` peeks at a closed fold, or falls back to LSP hover.
@@ -702,26 +691,7 @@ flowchart TD
   highlighted). Colours link to the theme's `Diagnostic*` groups and are re-linked on `ColorScheme`
   (rainglow runs `highlight clear`).
 
-**Keys**
-
-| Key | Action |
-|---|---|
-| `F5` / `<leader>dc` | start / continue |
-| `F10` / `<leader>do` | step over |
-| `F11` / `<leader>di` | step into |
-| `S-F11` / `<leader>du` | step out |
-| `F9` / `<leader>dt` | toggle breakpoint |
-| `<leader>dB` | conditional breakpoint (prompts for the condition) |
-| `<leader>dL` | logpoint (message, `{expr}` interpolates) |
-| `<leader>db` / `<leader>dx` | list / clear all breakpoints |
-| `<leader>dE` | exception breakpoints (the adapter offers the choices) |
-| `<leader>dC` | run to cursor |
-| `<leader>dp` / `<leader>dR` / `<leader>dq` | pause / restart / terminate |
-| `<leader>dl` | run last configuration again |
-| `<leader>de` | evaluate word or visual selection |
-| `<leader>dw` | watch word or visual selection |
-| `<leader>ds` / `<leader>df` | variables in scope / call stack |
-| `<leader>dU` / `<leader>dr` | toggle UI / toggle REPL |
+**Keys:** all in `keymaps.lua` (a lazy `keys` list); listed in `user_overview.md` → *Debugging*.
 
 **Extending**
 - New language: see [the recipe](#a-debugger-for-a-language).
@@ -775,19 +745,7 @@ flowchart LR
     diff -- "#lt;C-s#gt; / :w accept<br/>#lt;C-q#gt; reject" --> claude
 ```
 
-**Keys** (`<leader>a`, all in which-key)
-
-| Key | Action |
-|---|---|
-| `ac` / `af` | toggle / focus the Claude window (hiding keeps the session) |
-| `ar` / `aC` / `am` | resume a past conversation / continue the last / start with a chosen model |
-| `ab` | type `@this-file` into Claude's prompt, at its cursor (not sent) |
-| `as` | Visual: `@file#Lx-y` for the selected lines. In netrw or a snacks explorer/list: the file(s) under the cursor, marked or selected |
-| `<A-c>` | in any snacks picker: reference the picked files (`<Tab>` for several; grep results reference their line) |
-| `aa` / `ad` | accept / reject the diff in this tab, else the only waiting one, else ask which |
-| `aj` / `ax` | jump to a waiting diff / reject all waiting diffs |
-| `aS` / `ao` | connection status / options menu |
-| `<A-e>` | editor ⟷ Claude (see [Terminal](#terminal)) |
+**Keys:** `<leader>a…`, all in `keymaps.lua`; listed in `user_overview.md` → *Claude Code*.
 
 In the Claude terminal, `<C-x>` is Claude's chord prefix (`<C-x><C-k>` stop agents, `<C-x><C-e>`
 editor, …), so `<C-x><C-x>` leaves terminal mode there.
@@ -824,7 +782,7 @@ with the file in several windows and tabs, several waiting diffs, a new file and
 
 **What:** jupynium.nvim drives a Jupyter notebook in Firefox from a `.ju.py` file.
 
-**Files:** `plugins/configs/tools/jupynium.lua`. Usage notes are in `README.md` ("Things to remember").
+**Files:** `plugins/configs/tools/jupynium.lua`. Usage (keys, `.ipynb` conversion) is in `user_overview.md` → *Jupyter*.
 
 Loads on Python files or its commands. Cells are separated by `# %%`. `<space>ja` starts, attaches
 and syncs in one go. `<space>x` executes the current cell.

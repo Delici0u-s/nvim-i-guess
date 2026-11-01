@@ -81,6 +81,30 @@ function M.setup()
 			},
 		},
 	})
+
+	-- Command-line popup (cmp-cmdline). The popup appears only after this many
+	-- typed characters, so short commands like :w stay quiet.
+	local cmdline_min_chars = 2
+	-- <Tab>/<S-Tab> cycle (preset), plus the same <C-J>/<C-K> as in insert mode.
+	local cmdline_mapping = cmp.mapping.preset.cmdline({
+		["<C-J>"] = { c = cmp.mapping.select_next_item() },
+		["<C-K>"] = { c = cmp.mapping.select_prev_item() },
+	})
+
+	cmp.setup.cmdline({ "/", "?" }, {
+		mapping = cmdline_mapping,
+		sources = { { name = "buffer", keyword_length = cmdline_min_chars } },
+	})
+
+	cmp.setup.cmdline(":", {
+		mapping = cmdline_mapping,
+		sources = cmp.config.sources({
+			{ name = "path", keyword_length = cmdline_min_chars },
+		}, {
+			{ name = "cmdline", keyword_length = cmdline_min_chars },
+		}),
+		matching = { disallow_symbol_nonprefix_matching = false },
+	})
 end
 -- local function debug_lsp_completion()
 -- 	local clients = vim.lsp.get_clients({ bufnr = 0 })

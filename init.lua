@@ -8,10 +8,4 @@ vim.o.shell = "zsh"
 vim.o.shellcmdflag = "-ic"
 vim.o.shellxquote = ""
 
-vim.g.mlang_config = {
-	enable_diagnostics = true,
-	allowed_severities = { 1, 2 }, -- show Errors + Warnings only
-	ignore_patterns = { "Undefined function", "not found", "unexpected token" },
-}
-
 require("configs")

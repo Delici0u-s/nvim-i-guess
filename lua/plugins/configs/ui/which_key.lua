@@ -2,7 +2,7 @@
 --
 -- This file is the one place prefixes get their names. Individual keys need
 -- no registration here: which-key reads each mapping's `desc`. When you start
--- a new prefix, name it below (and in overview.md's prefix table).
+-- a new prefix, name it below (and in impl_overview.md's prefix table).
 return function()
 	local wk = require("which-key")
 	wk.setup({

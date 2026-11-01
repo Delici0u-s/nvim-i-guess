@@ -69,7 +69,8 @@ return {
 	},
 	{
 		"hrsh7th/nvim-cmp",
-		event = "InsertEnter",
+		-- CmdlineEnter too: cmp-cmdline's popup must exist before the first insert.
+		event = { "InsertEnter", "CmdlineEnter" },
 		dependencies = {
 			"hrsh7th/cmp-nvim-lsp",
 			"hrsh7th/cmp-buffer",
