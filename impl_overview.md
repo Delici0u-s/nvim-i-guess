@@ -444,6 +444,8 @@ flowchart LR
   snippet. Sorting: score, recently used, locality.
 - cmp-cmdline: popup on `:` (paths, then commands/arguments) and `/` `?` (buffer words) after
   `cmdline_min_chars` typed characters. `<Tab>`/`<S-Tab>` or `<C-J>`/`<C-K>` cycle.
+  On `:` the command the typed word runs (`fullcommand()`, e.g. `w` → `write`) is ranked first,
+  then exact, shorter, alphabetical: Neovim's completion never lists abbreviations themselves.
 - LuaSnip `<Tab>`/`<S-Tab>` only take over while a snippet is active, otherwise they pass through.
   An autocmd unlinks a snippet once you leave it, so `<Tab>` doesn't keep jumping back.
 - lsp_signature shows a floating signature window (inline hints off).

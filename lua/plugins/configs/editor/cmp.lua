@@ -96,8 +96,41 @@ function M.setup()
 		sources = { { name = "buffer", keyword_length = cmdline_min_chars } },
 	})
 
+	-- Neovim's completion only lists full command names, never abbreviations,
+	-- so `:w` offers `write` (not `w`) and cmp's default score order buries it.
+	-- Rank the command the typed word actually runs (fullcommand("w") = "write")
+	-- first, then exact matches, then shorter names, then alphabetical.
+	local function typed_command()
+		local word = vim.fn.getcmdline():match("^%s*(%S+)$")
+		if not word then
+			return nil -- typing arguments: keep the normal order
+		end
+		local ok, full = pcall(vim.fn.fullcommand, word)
+		return ok and full ~= "" and full or nil
+	end
+	local function runs_typed_command(a, b)
+		local full = typed_command()
+		if not full then
+			return nil
+		end
+		local a_hit = a:get_completion_item().label == full
+		local b_hit = b:get_completion_item().label == full
+		if a_hit ~= b_hit then
+			return a_hit
+		end
+		return nil
+	end
+
 	cmp.setup.cmdline(":", {
 		mapping = cmdline_mapping,
+		sorting = {
+			comparators = {
+				runs_typed_command,
+				cmp.config.compare.exact,
+				cmp.config.compare.length,
+				cmp.config.compare.order,
+			},
+		},
 		sources = cmp.config.sources({
 			{ name = "path", keyword_length = cmdline_min_chars },
 		}, {
