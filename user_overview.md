@@ -58,7 +58,6 @@ Leader is **Space**. How things are built: `impl_overview.md`. Requirements: `RE
 | `<A-v>` | Visual block immediately (bare `<C-v>` waits, it's a prefix) |
 | `<C-l>` | toggle search highlight |
 | completion | `<C-J>`/`<C-K>` move, `<CR>` confirm; LSP, snippets, buffer, path |
-| command-line completion | popup on `:` `/` `?` from the first typed character (`cmdline_min_chars`, `editor/cmp.lua`); `<Tab>`/`<S-Tab>` or `<C-J>`/`<C-K>` cycle |
 | snippets | `<Tab>`/`<S-Tab>` jump while a snippet is active (`headerguard` in C/C++) |
 | autopairs | brackets and quotes close themselves |
 | typing-transformer | fixes typos as you type (`cosnt ` → `const `); rules in `plugins/lazy/general.lua` |
