@@ -23,3 +23,18 @@ vim.api.nvim_create_autocmd({ "VimLeavePre" }, {
 	end,
 	desc = "Delete empty temp ShaDa files",
 })
+
+-- 'autoread' only reloads when Neovim checks the file; trigger that check on
+-- focus/buffer switch/idle so edits made outside Neovim show up. Unmodified
+-- buffers reload silently; you are only asked when the buffer has unsaved
+-- edits AND the file changed on disk.
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold" }, {
+	group = vim.api.nvim_create_augroup("reload_changed_files", { clear = true }),
+	callback = function()
+		-- :checktime errors in the command-line window (E11).
+		if vim.fn.getcmdwintype() == "" then
+			vim.cmd.checktime()
+		end
+	end,
+	desc = "Reload buffers whose files changed on disk",
+})
