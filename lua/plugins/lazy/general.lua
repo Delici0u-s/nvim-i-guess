@@ -173,11 +173,12 @@ return {
 		opts = {
 			global = {
 				'"  |)"  -> ")|"',
+				'"  |""  -> ""|"',
 				'"cosnt |" -> "const |"',
 			},
 			filetype = {
 				lua = {
-					'"test|" -> "successful|"',
+					-- '"test|" -> "successful|"',
 					'"!lfn|" -> "local function |"',
 				},
 			},
