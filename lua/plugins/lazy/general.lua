@@ -184,6 +184,16 @@ return {
 			},
 		},
 	},
+	{
+		"MagicDuck/grug-far.nvim",
+		-- grug_far/keymaps.lua is the only list of its keys; lazy both maps
+		-- them and uses them as load triggers.
+		cmd = { "GrugFar", "GrugFarWithin" },
+		keys = require("plugins.configs.editor.grug_far.keymaps"),
+		config = function()
+			require("plugins.configs.editor.grug_far")()
+		end,
+	},
 
 	-- ===========================================================================
 	-- DEBUGGING

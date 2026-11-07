@@ -64,6 +64,13 @@ Leader is **Space**. How things are built: `impl_overview.md`. Requirements: `RE
 | format on save | conform: stylua, ruff/black/isort, clang-format, gofmt, rustfmt, `zig fmt` |
 | folds | open by default; `zk` peek fold (else hover), `zR`/`zM` open/close all, `zr`/`zm` by level |
 | persistent undo | survives restarts |
+| `<C-f>` | search & replace in this file (grug-far, word under cursor prefilled); in Visual mode: within the selection |
+| `<C-g>` | search & replace in the whole project; in Visual mode: the selected text prefilled |
+| in grug-far | type Search / Replace, results preview live; `\r` replace all, `\s` apply edits made to result lines, `\q` to quickfix, `\c` close, `g?` all keys |
+| grug-far: move through matches | `<Down>`/`<Up>` show next / previous match in the code (you stay in grug-far), `<Enter>` jump there, `\o` open without leaving, `\i` preview float, `\j`/`\k` replace this one and go to next / previous |
+| `]q` / `[q` | next / previous quickfix entry from any buffer (after `\q` in grug-far or `<C-q>` in a picker); grug-far doesn't set `/`, so `n`/`N` don't follow it |
+| `:cdo s/a/b/gc \| update` | builtin alternative: replace in every quickfix match (fill it with `<C-q>` in a grep picker) |
+| `*` then `cgn`, `.` | change the next match, repeat on the following ones (`n` skips) |
 
 ## Code and LSP
 

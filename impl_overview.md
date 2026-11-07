@@ -26,6 +26,7 @@ Written for someone (or an agent) new to the repo: read this instead of re-explo
    [LSP](#lsp) ·
    [Zig extras](#zig-extras) ·
    [Completion and snippets](#completion-and-snippets) ·
+   [Search and replace](#search-and-replace-grug-far) ·
    [Formatting](#formatting) ·
    [Treesitter and folding](#treesitter-and-folding) ·
    [UI](#ui) ·
@@ -101,7 +102,8 @@ lua/
 │       ├── ui/                  lualine statuscol indent_blankline snacks
 │       │                        snacks_image snacks_pickers ufo render_markdown which_key
 │       ├── editor/              cmp luasnip conform lsp_signature
-│       │   └── snippets/        LuaSnip definitions (global.lua, c.lua)
+│       │   ├── snippets/        LuaSnip definitions (global.lua, c.lua)
+│       │   └── grug_far/        search & replace: init.lua (setup) + keymaps.lua (also the spec's lazy keys)
 │       ├── lang/                mason mason_tools treesitter lazydev
 │       └── tools/               jupynium, dap/, claudecode/
 │           ├── claudecode/      Claude Code bridge (see Claude Code section)
@@ -323,6 +325,7 @@ Every individual key is listed in `user_overview.md`; the desc on each map says 
 | `editor/luasnip.lua`, `editor/cmp.lua` | `<Tab>`/`<S-Tab>` (only while a snippet is active), `<C-J>`/`<C-K>`/`<CR>` |
 | `core/netrw.lua` → `utils/netrw.lua` | netrw buffer-local `gh` `gl` `gb` `q` (also `<space>`-prefixed) and the `D` `d` `%` `R` `<C-l>` replacements |
 | `tools/dap/keymaps.lua` | `F5` `F9` `F10` `F11` `S-F11` |
+| `editor/grug_far/keymaps.lua` | `<C-f>` replace in file / within selection, `<C-g>` replace in project (shadow page-forward and file-info) |
 
 > [!WARNING]
 > Ctrl-key prefixes shadow builtins: `<C-t>` tag-pop, `<C-h>` window left, `<C-v>` visual block,
@@ -447,6 +450,21 @@ flowchart LR
 - lsp_signature shows a floating signature window (inline hints off).
 - `typing-transformer.nvim` (your plugin) rewrites typed patterns, e.g. `cosnt ` → `const `.
   Rules are in its spec in `general.lua`.
+
+## Search and replace (grug-far)
+
+**What:** grug-far.nvim, a buffer with Search / Replace / Files filter / Paths fields and a live
+before → after preview, run by ripgrep. Code symbols are still renamed with LSP `grn`.
+
+**Files:** `plugins/configs/editor/grug_far/{init,keymaps}.lua`; spec under EDITING in `general.lua`.
+
+**How it works**
+- Loads on its keys or `:GrugFar` / `:GrugFarWithin`. `keymaps.lua` is the lazy `keys` list, as in dap.
+- `<C-f>` opens it with Paths set to the current file; in Visual mode it uses
+  `visualSelectionUsage = "operate-within-range"` (the selection becomes a buffer range).
+  `<C-g>` leaves Paths empty (whole project); in Visual mode the selection prefills Search.
+- In its buffer the plugin's own keys are buffer-local under `<localleader>` (`\`), nothing else
+  uses that leader. `g?` lists them.
 
 ---
 
